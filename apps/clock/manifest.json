@@ -1,0 +1,87 @@
+{
+  "name": "Clock",
+  "description": "digital, analog, and even a calendar...",
+  "entrypoint": "clock.js",
+  "icon": [
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 200, "green": 202, "blue": 208, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 200, "green": 202, "blue": 208, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 }
+    ],
+    [
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 200, "green": 202, "blue": 208, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 }
+    ],
+    [
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 200, "green": 202, "blue": 208, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 }
+    ],
+    [
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 80, "green": 80, "blue": 80, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ]
+  ]
+}

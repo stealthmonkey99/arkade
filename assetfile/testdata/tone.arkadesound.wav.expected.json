@@ -1,0 +1,26 @@
+{
+  "arkade": 1,
+  "kind": "sound",
+  "name": "tone",
+  "description": "Fixture tone: a single short blip.",
+  "generator": {
+    "tool": "assetfile-fixtures",
+    "version": "1.0.0"
+  },
+  "recipe": {
+    "compose": [
+      {
+        "sfx": "blip",
+        "params": {
+          "hz": 880,
+          "ms": 60
+        }
+      }
+    ]
+  },
+  "render": {
+    "sampleRate": 22050,
+    "channels": 1,
+    "bits": 16
+  }
+}

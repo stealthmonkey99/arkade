@@ -1,0 +1,54 @@
+<svg role="img" aria-label="Three game modes — title, playing and game over — with one entry hook running on every arrival, and a modal that suspends the screen underneath rather than becoming a fourth mode" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 250" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" fill="currentColor">
+  <g stroke="currentColor" fill="none" stroke-width="1.5">
+    <rect x="24" y="96" width="150" height="56" rx="8"/>
+    <rect x="245" y="96" width="150" height="56" rx="8"/>
+    <rect x="466" y="96" width="150" height="56" rx="8"/>
+    <path d="M174 124h59"/>
+    <path d="M395 124h59"/>
+    <path d="M541 152v58H99v-58"/>
+  </g>
+  <g fill="currentColor">
+    <path d="M245 124l-12-5v10z"/>
+    <path d="M466 124l-12-5v10z"/>
+    <path d="M99 152l-5 12h10z"/>
+  </g>
+
+  <!-- The entry hook: one dot per arrival edge, labelled once. -->
+  <g fill="currentColor">
+    <circle cx="24" cy="124" r="4"/>
+    <circle cx="245" cy="124" r="4"/>
+    <circle cx="466" cy="124" r="4"/>
+  </g>
+
+  <!-- A modal is not a fourth mode: it sits on top and hands the screen back. -->
+  <g stroke="currentColor" fill="none" stroke-width="1.5" stroke-dasharray="4 3">
+    <rect x="245" y="26" width="150" height="42" rx="8"/>
+  </g>
+  <g stroke="currentColor" fill="none" stroke-width="1.5">
+    <path d="M300 68v20"/>
+    <path d="M340 88V68"/>
+  </g>
+  <g fill="currentColor">
+    <path d="M300 96l-5-12h10z"/>
+    <path d="M340 60l-5 12h10z"/>
+  </g>
+
+  <g text-anchor="middle" font-size="14">
+    <text x="99" y="122">modeTitle</text>
+    <text x="320" y="122">modePlaying</text>
+    <text x="541" y="122">modeGameOver</text>
+    <text x="320" y="52" font-size="12.5">modal — hold-B confirm</text>
+  </g>
+  <g text-anchor="middle" font-size="11.5" opacity="0.62">
+    <text x="99" y="140">the zero value</text>
+    <text x="320" y="140">exactly one is active</text>
+    <text x="541" y="140">name entry, then out</text>
+    <text x="320" y="228">back to the title — never a fourth boolean</text>
+  </g>
+  <g font-size="11.5" opacity="0.62">
+    <text x="236" y="86" text-anchor="end">suspends; does not replace</text>
+  </g>
+  <g font-size="11.5" opacity="0.62">
+    <text x="24" y="182">● every arrival runs the screen's entry hook: LCD, lamps, lights</text>
+  </g>
+</svg>

@@ -1,0 +1,128 @@
+{
+  "arkade": 1,
+  "kind": "hid",
+  "name": "buffalo",
+  "description": "Buffalo Classic USB Gamepad (SNES-style). The face buttons alias onto the cabinet's colours REVERSED (Y=green, X=red, B=yellow, A=blue).",
+  "generator": {
+    "tool": "arkade-engine",
+    "version": "1.0.0"
+  },
+  "device": {
+    "vendor": 1411,
+    "product": 8288,
+    "name": "Buffalo",
+    "directional": "dpad"
+  },
+  "channels": [
+    {
+      "name": "stick.x",
+      "kind": "axis",
+      "report": {
+        "byte": 0,
+        "bias": 128,
+        "divide": 10
+      }
+    },
+    {
+      "name": "stick.y",
+      "kind": "axis",
+      "report": {
+        "byte": 1,
+        "bias": 128,
+        "divide": 10
+      }
+    },
+    {
+      "name": "face.a",
+      "kind": "button",
+      "report": {
+        "byte": 2
+      }
+    },
+    {
+      "name": "face.b",
+      "kind": "button",
+      "report": {
+        "byte": 2,
+        "bit": 1
+      }
+    },
+    {
+      "name": "face.x",
+      "kind": "button",
+      "report": {
+        "byte": 2,
+        "bit": 2
+      }
+    },
+    {
+      "name": "face.y",
+      "kind": "button",
+      "report": {
+        "byte": 2,
+        "bit": 3
+      }
+    },
+    {
+      "name": "l1",
+      "kind": "button",
+      "report": {
+        "byte": 3
+      }
+    },
+    {
+      "name": "r1",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 1
+      }
+    },
+    {
+      "name": "select",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 2
+      }
+    },
+    {
+      "name": "start",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 3
+      }
+    },
+    {
+      "name": "turbo",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 4
+      }
+    },
+    {
+      "name": "clear",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 5
+      }
+    }
+  ],
+  "standard": {
+    "clear": "clear",
+    "face.a": "d",
+    "face.b": "c",
+    "face.x": "b",
+    "face.y": "a",
+    "l1": "l1",
+    "r1": "r1",
+    "select": "select",
+    "start": "start",
+    "stick.x": "joy.x",
+    "stick.y": "joy.y",
+    "turbo": "turbo"
+  }
+}

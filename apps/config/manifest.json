@@ -1,0 +1,86 @@
+{
+  "name": "Settings",
+  "entrypoint": "settings.js",
+  "icon": [
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 204, "green": 204, "blue": 204, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 136, "green": 136, "blue": 136, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 136, "green": 136, "blue": 136, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 136, "green": 136, "blue": 136, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 136, "green": 136, "blue": 136, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 131, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 197, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 131, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 136, "green": 136, "blue": 136, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 131, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 197, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 131, "blue": 255, "alpha": 255 },
+      { "red": 19, "green": 124, "blue": 19, "alpha": 255 },
+      { "red": 32, "green": 207, "blue": 32, "alpha": 255 },
+      { "red": 19, "green": 124, "blue": 19, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ],
+    [
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 },
+      { "red": 0, "green": 131, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 197, "blue": 255, "alpha": 255 },
+      { "red": 0, "green": 131, "blue": 255, "alpha": 255 },
+      { "red": 19, "green": 124, "blue": 19, "alpha": 255 },
+      { "red": 32, "green": 207, "blue": 32, "alpha": 255 },
+      { "red": 19, "green": 124, "blue": 19, "alpha": 255 },
+      { "red": 0, "green": 0, "blue": 0, "alpha": 0 }
+    ]
+  ]
+}

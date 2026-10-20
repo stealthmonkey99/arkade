@@ -1,0 +1,110 @@
+// Catcher's authored waves — the opening minute of a run, drawn by hand
+// instead of drawn from the RNG. Edit them here or in levellab at
+// arkade.build/dev/tools (import this file, export it back); `make build`
+// compiles it into the Go the cartridge builds in.
+//
+// # How to read a grid
+//
+// A row is a MOMENT, not a place. Time runs down the page: row 0 fires the
+// instant the wave starts, row 1 one `cadence` later, and so on. A column is
+// a drop lane spread evenly across the 64-pixel panel — lane 0 at the left
+// edge, lane 11 at the right — so an `o` says "a fruit falls here, now", and
+// two `o`s on one row fall together.
+//
+// `cadence` is sim steps between rows (one step is 25 ms) and `fall` is the
+// fall speed in sixteenths of a pixel per step, so a wave gets harder by
+// dropping its rows closer together, by falling faster, or both.
+//
+// `par` is deliberately absent: tools/genlevels DERIVES it — the most
+// fruit a player who only WALKS can bring in — and a hand-written value
+// would be replaced by the solver's anyway. Catch par and the wave pays a
+// clear bonus.
+//
+// The generator also refuses waves the cartridge cannot run: one holding a
+// drop no walking player can reach (a miss costs one of three lives, so an
+// unreachable fruit is a life on a timer), and one whose rows land so close
+// together that more than six fruit are airborne at once, which is the size
+// of the sim's fixed fruit array.
+
+pack waves
+
+legend
+  .  sky
+  o  fruit
+
+// Wave 1 opens with a fruit straight over the catcher's starting spot: the
+// first thing a new player does is nothing, and the game should reward it
+// once before it starts asking for footwork.
+level "FIRST DROPS"
+  cadence 20
+  fall    14
+  |.....o......|
+  |............|
+  |............|
+  |...o........|
+  |............|
+  |............|
+  |.......o....|
+  |............|
+  |............|
+  |.o..........|
+  |............|
+  |..........o.|
+
+// Two on a row fall together, and the pair is always close enough that
+// one basket covers both — which is the whole lesson: line the middle of
+// the basket up, do not pick a side. The generator refuses a pair wider
+// than that, because a fruit nobody can reach is a life on a timer.
+level DOUBLES
+  cadence 16
+  fall    16
+  |.....oo.....|
+  |............|
+  |............|
+  |..oo........|
+  |............|
+  |............|
+  |........oo..|
+  |............|
+  |............|
+  |...oo.......|
+  |............|
+  |......oo....|
+
+// Alternating edges at a cadence a walk can only just keep up with. Every
+// drop is still reachable on foot — the solver insists — but this is where
+// the dash starts paying for itself.
+level "THE ZIGZAG"
+  cadence 14
+  fall    20
+  |.o..........|
+  |............|
+  |..........o.|
+  |............|
+  |..o.........|
+  |............|
+  |.........o..|
+  |............|
+  |...o........|
+  |............|
+  |........o...|
+  |............|
+
+// The finale: one fruit every quarter second, sweeping out to the left
+// edge and back across to the right. Nothing in it is out of reach and
+// there is not one spare moment in it either.
+level DOWNPOUR
+  cadence 10
+  fall    24
+  |.....o......|
+  |....o.......|
+  |...o........|
+  |..o.........|
+  |.o..........|
+  |o...........|
+  |..o.........|
+  |.....o......|
+  |........o...|
+  |..........o.|
+  |...........o|
+  |.........o..|

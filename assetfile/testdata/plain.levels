@@ -1,0 +1,10 @@
+pack walls
+
+legend
+  . floor
+  # wall
+
+level L01
+  |###|
+  |#.#|
+  |###|

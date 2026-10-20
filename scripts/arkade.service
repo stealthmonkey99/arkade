@@ -1,0 +1,97 @@
+# Årkade arcade cabinet systemd service.
+#
+# Install (run on the Pi):
+#   sudo cp scripts/arkade.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now arkade
+#
+# Control:
+#   sudo systemctl start arkade     # manually start
+#   sudo systemctl restart arkade   # restart (e.g., after code sync)
+#   sudo systemctl stop arkade      # graceful stop
+#   sudo systemctl status arkade    # check status
+#
+# Logs:
+#   journalctl -u arkade -e         # tail recent logs
+#   journalctl -u arkade -f         # follow in real time
+#
+# Dashboard: status/logs/scores JSON, the game table (launch, attract preview,
+# score editing) and a live HTML page — see internal/net and docs/DASHBOARD.md.
+# --http defaults to 127.0.0.1:8080 — loopback only,
+# since its read routes (/api/status, /api/logs, /api/scores, /api/games)
+# have no auth. Not set below, so ExecStart's default applies; reach it from
+# another machine with an SSH tunnel instead of exposing it on the LAN:
+#   ssh -L 8080:127.0.0.1:8080 <cabinet-host>   # then browse http://localhost:8080
+# (must be "localhost", not a bare hostname — see the Host note further down.)
+#
+# The dashboard's MUTATING routes (cartridge install, launch, attract preview,
+# score edits) need a shared secret in ARKADE_HTTP_TOKEN and fail closed (503)
+# without one. Do NOT put it in this file — it is in the repo. Use a drop-in,
+# which also survives a redeploy of this unit:
+#   mkdir -p /etc/systemd/system/arkade.service.d
+#   printf "[Service]\nEnvironment=ARKADE_HTTP_TOKEN=%s\n" "$(openssl rand -hex 24)" \
+#     > /etc/systemd/system/arkade.service.d/token.conf
+#   systemctl daemon-reload && systemctl restart arkade
+#   systemctl show arkade -p Environment    # read it back for the dashboard
+#
+# If LAN exposure is ever genuinely wanted (not the recommended path), it's
+# an explicit, deliberate opt-in: add e.g. `--http :8080` to ExecStart below.
+# If the dashboard will be reached by a hostname rather than an IP, also add
+# `--http-allowed-hosts <that-hostname>` — unrecognized Host headers are
+# rejected (DNS-rebinding protection) and a bare
+# hostname (unlike a literal IP) isn't accepted by default.
+#
+
+[Unit]
+Description=Årkade arcade cabinet engine
+After=network.target sound.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+# %h is the home of the user running the manager (root); the deployment lives in its arkade directory.
+WorkingDirectory=%h/arkade
+# The boot tool owns the LCDs until this moment; stopping it is what makes it
+# finish its card and hand the panels over still lit at 30%. The + prefix runs it
+# outside the sandboxing below, which would otherwise keep it from reaching
+# systemd. NOT Conflicts= — that is symmetric, so a crash card starting would
+# stop the engine.
+ExecStartPre=+/usr/bin/systemctl stop arkade-lcdboot.service
+# --cartridges: scan the on-disk library plus USB sticks auto-mounted
+# under /media by scripts/99-arkade-cartridge.rules (see pi-setup.sh).
+ExecStart=%h/arkade/arkade --led --led-slowdown 3 --led-mapping regular --cartridges "data/cartridges,/media/*" --mic plughw:0,0
+# On a clean stop this does nothing — the engine has already left its own
+# power-off message on the panels. On a failure it records the exit under
+# /run/arkade and starts the boot tool again, which reads it and shows a
+# crash card for the five seconds until RestartSec brings the engine back.
+ExecStopPost=+%h/arkade/arkade-lcdboot --after-engine
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Sandboxing. The unit runs as root: the LED matrix opens /dev/mem-backed GPIO,
+# and the same process owns hidraw, I2C and ALSA. Nothing below touches /dev,
+# capabilities, or the executable memory the wasm runtime needs.
+NoNewPrivileges=yes
+ProtectSystem=strict
+# The data directory holds settings, scores and uploaded bundles: everything
+# arkade writes at runtime.
+ReadWritePaths=%h/arkade/data
+PrivateTmp=yes
+# AF_UNIX is the BlueZ D-Bus connection; AF_INET/AF_INET6 the dashboard. The
+# WASI surface cartridges see has no socket calls.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+# Deliberately NOT set, and why:
+#   ProtectHome=yes hides the deployment itself, which lives under /root;
+#     ProtectSystem=strict already makes it read-only outside ReadWritePaths.
+#   PrivateDevices=yes hides the GPIO, hidraw and I2C nodes the cabinet needs.
+#   MemoryDenyWriteExecute=yes blocks wazero's compiler from JITting
+#     cartridge wasm.
+
+[Install]
+WantedBy=multi-user.target

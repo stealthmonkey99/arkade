@@ -1,0 +1,57 @@
+// Four small crate-pushing levels: the plain shape a pack has to fit. One
+// grid, a short legend, a player start and a coop flag as metadata.
+// fidelity_test.go decodes this pack and asserts every cell, dimension and
+// player start against a Go transcription of the same levels.
+//
+// `par` is deliberately absent: the generator DERIVES it from a BFS
+// solver, and so does this pack's hook (hook_test.go).
+
+pack solo
+
+legend
+  #  wall
+  \s floor
+  .  target
+  $  crate
+  *  crate-on-target
+  S  switch
+  G  gate
+
+level L01
+  p1x 3
+  p1y 1
+  coop false
+  |######|
+  |#.$  #|
+  |######|
+
+level L02
+  p1x 2
+  p1y 4
+  coop false
+  |#####|
+  |# . #|
+  |#   #|
+  |# $ #|
+  |#   #|
+  |#####|
+
+level L03
+  p1x 1
+  p1y 1
+  coop false
+  |######|
+  |#    #|
+  |# $  #|
+  |#   .#|
+  |######|
+
+level L04
+  p1x 3
+  p1y 3
+  coop false
+  |#######|
+  |#.   .#|
+  |# $ $ #|
+  |#     #|
+  |#######|

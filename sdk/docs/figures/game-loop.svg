@@ -1,0 +1,27 @@
+<svg role="img" aria-label="The host's frame loop: handle input, update by a time delta, render, then repeat on the next frame" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 210" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" fill="currentColor">
+  <g stroke="currentColor" fill="none" stroke-width="1.5">
+    <rect x="24" y="34" width="158" height="60" rx="8"/>
+    <rect x="241" y="34" width="158" height="60" rx="8"/>
+    <rect x="458" y="34" width="158" height="60" rx="8"/>
+    <path d="M182 64h47"/>
+    <path d="M399 64h47"/>
+    <path d="M537 94v46H103V94"/>
+  </g>
+  <g fill="currentColor">
+    <path d="M241 64l-12-5v10z"/>
+    <path d="M458 64l-12-5v10z"/>
+    <path d="M103 94l-5 12h10z"/>
+  </g>
+  <g text-anchor="middle" font-size="14">
+    <text x="103" y="62">HandleInput</text>
+    <text x="320" y="62">Update</text>
+    <text x="537" y="62">Render</text>
+  </g>
+  <g text-anchor="middle" font-size="11.5" opacity="0.62">
+    <text x="103" y="80">what they pressed</text>
+    <text x="320" y="80">advance by dtMicros</text>
+    <text x="537" y="80">draw the world</text>
+    <text x="320" y="158">every frame, ~30x a second</text>
+    <text x="320" y="20">the HOST owns this loop — you implement the three boxes</text>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "abi": 1,
+  "slug": "template",
+  "title": "Template Demo",
+  "publisher": "arkade",
+  "author": "Årkade",
+  "version": "0.1.0",
+  "description": "SDK starter cartridge: a bouncing block, a button-light chase, and a persisted counter",
+  "tags": ["sim"],
+  "players": ["1p"],
+  "audience": "all-ages",
+  "capabilities": [],
+  "visibility": "public",
+  "icon": "assets/icon.png",
+  "links": { "source": null }
+}

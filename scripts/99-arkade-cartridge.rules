@@ -1,0 +1,11 @@
+# Auto-mount USB storage for Årkade cartridges (install: cp to
+# /etc/udev/rules.d/ && udevadm control --reload).
+#
+# Any filesystem partition on a USB disk mounts read-only under
+# /media/cartridge-<kernel-name> via systemd-mount: --automount defers the
+# real mount until first access, --collect garbage-collects the unit when
+# the device disappears (so yanking the stick without ejecting is safe —
+# read-only means there's nothing to corrupt), and the engine's cartridge
+# watcher (--cartridges "/media/*") picks up .rcart/.wasm files at the
+# mount root within a few seconds of plug-in.
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_USAGE}=="filesystem", SUBSYSTEMS=="usb", RUN{program}+="/usr/bin/systemd-mount --no-block --automount=yes --collect --options=ro $devnode /media/cartridge-%k"

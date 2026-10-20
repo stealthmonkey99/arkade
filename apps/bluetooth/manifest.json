@@ -1,0 +1,407 @@
+{
+  "name": "Bluetooth",
+  "description": "pair a wireless controller, and say which seat it plays",
+  "entrypoint": "bluetooth.go",
+  "icon": [
+    [
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ],
+    [
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 60,
+        "green": 130,
+        "blue": 246,
+        "alpha": 255
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      },
+      {
+        "red": 0,
+        "green": 0,
+        "blue": 0,
+        "alpha": 0
+      }
+    ]
+  ]
+}

@@ -1,0 +1,96 @@
+// Four tray-packing levels: the harder shape a pack has to fit. Named
+// metadata (budget, goal) that means nothing to a crate-pusher, level names
+// with spaces, and TWO extra grids over the same board whose dimensions
+// differ from it — the vertical-divider grid is one column wider than the
+// tray, because it describes the edges between cells rather than the cells.
+
+pack puzzle
+
+legend
+  .  empty
+  r  red
+  g  green
+  b  blue
+  y  yellow
+  p  purple
+  w  white
+  k  black
+  s  stone
+  i  ice
+  W  wild
+  X  divider
+
+level "ONE PIECE"
+  budget 2
+  goal   1
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |.r........|
+
+level "FILL THE ROW"
+  budget 6
+  goal   4
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |rgb.......|
+
+level "HIGH SHELF"
+  budget 4
+  goal   2
+  |..........|
+  |..........|
+  |y.........|
+  |p.........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+
+level "WALLED IN"
+  budget 5
+  goal   3
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |.....k....|
+  |..........|
+  |....sWs...|
+  |.w...b...i|
+  // 'X' at (r, c) is a divider along cell (r, c)'s TOP edge.
+  layer hfix
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |..........|
+  |.....X....|
+  |..........|
+  |..........|
+  |.X.......X|
+  // 'X' at (r, c) is a divider along cell (r, c)'s LEFT edge — eleven
+  // columns for a ten-column tray.
+  layer vfix
+  |...........|
+  |...........|
+  |...........|
+  |...........|
+  |...........|
+  |.....XX....|
+  |...........|
+  |...........|
+  |.X...XX...X|

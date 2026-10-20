@@ -1,0 +1,74 @@
+# Command binaries: `go build ./<path>` at the root names the binary after
+# the directory, and so does `go build` inside it
+/arkade
+/arkade-lcdboot
+/arkadepreview
+/micmodel
+/micprobe
+/gen-boop
+/gen-stinger
+/assetdiff
+/genlevelpack
+/manifestgen
+/manualicon
+/preflight
+/rcartpack
+/rerender
+/wasmfix
+/cmd/arkade/arkade
+/cmd/arkade-lcdboot/arkade-lcdboot
+/cmd/arkadepreview/arkadepreview
+/cmd/micmodel/micmodel
+/cmd/micprobe/micprobe
+/apps/boot/tools/gen-stinger/gen-stinger
+/apps/config/tools/gen-boop/gen-boop
+/sdk/tools/manifestgen/manifestgen
+/sdk/tools/rcartpack/rcartpack
+/tools/assetdiff/assetdiff
+/tools/genlevelpack/genlevelpack
+/tools/manualicon/manualicon
+/tools/preflight/preflight
+/tools/speech/rerender/rerender
+/tools/wasmfix/wasmfix
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Runtime state
+/data/
+
+# Vendored C sources for the LED matrix binding: the header and its licence
+# are committed so ledpanel's cgo declarations stay analyzable; the lib builds on the Pi.
+/third_party/*
+!/third_party/rpi-rgb-led-matrix/
+/third_party/rpi-rgb-led-matrix/*
+!/third_party/rpi-rgb-led-matrix/include/
+!/third_party/rpi-rgb-led-matrix/COPYING
+!/third_party/rpi-rgb-led-matrix/README.md
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Env
+.env
+.env.local
+
+# Packaged cartridge bundles: built locally, never committed
+*.rcart
+
+# sdk/template and sdk/tutorial are their own Go modules; a bare
+# `go build ./...` inside one produces a stray command binary named after
+# the module, distinct from the checked-in .wasm.
+/sdk/template/arkade-cart-template
+/sdk/tutorial/arkade-cart-tutorial

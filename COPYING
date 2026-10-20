@@ -1,0 +1,57 @@
+Årkade — licensing application
+==============================
+
+Årkade is free software, licensed under the GNU General Public License,
+version 2 **or (at your option) any later version**.
+
+SPDX-License-Identifier: GPL-2.0-or-later
+
+The file `LICENSE` in this repository contains the verbatim text of the
+GNU General Public License, version 2 (June 1991). The notice below —
+following the "How to Apply These Terms" appendix of that license — is
+what upgrades it to "or any later version": you may redistribute and
+modify this software under GPLv2, or under any later version of the GPL
+published by the Free Software Foundation, at your choice.
+
+    Årkade, an engine for a 64×64 LED arcade cabinet
+    Copyright (C) 2026 Matt Bielich
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License as
+    published by the Free Software Foundation; either version 2 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+    02110-1301 USA, or see <https://www.gnu.org/licenses/>.
+
+This notice covers every file in this repository — source, docs, images
+and sounds alike — unless a file or its directory says otherwise. Source
+files carry a one-line SPDX identifier, GPL-2.0-or-later.
+
+Binaries
+--------
+
+The binaries built from this repository (the cabinet build, the console
+build and arkade-lcdboot) are distributed under the GNU General Public
+License, version 3, as the "any later version" clause permits. The reason
+is the Go modules they link: wazero, oto and periph.io are licensed under
+the Apache License 2.0, which is compatible with GPLv3 but not with
+GPLv2, so a combined binary can only be distributed under GPLv3.
+The GPLv3 text is in `LICENSES/GPL-3.0.txt`.
+
+The Raspberry Pi build also links hzeller's rpi-rgb-led-matrix, which is
+GPL-2.0-or-later and so combines under GPLv3 too.
+
+If you distribute a binary (an SD-card image, a pre-flashed kit, a
+cabinet you sell a friend), you must offer the complete corresponding
+source under GPLv3 — this repository's and rpi-rgb-led-matrix's — and
+ship wazero's NOTICE (`LICENSES/wazero-NOTICE`), as Apache-2.0 §4(d)
+requires. `THIRD_PARTY.md` lists every third-party work the repository
+vendors, fetches or links, with its licence.

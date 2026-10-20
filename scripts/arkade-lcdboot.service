@@ -1,0 +1,44 @@
+# Owns the two LCDs from the moment I2C bus 1 exists until the engine starts.
+#
+# The PCF8574 backpacks power up with every pin high, so without this the
+# panels are blank and glaring for the twenty-odd seconds the Pi needs to
+# reach arkade.service. arkade-lcdboot blanks them in its first writes and
+# spends that time showing what boot is waiting on.
+#
+# Started by scripts/99-arkade-lcdboot.rules the moment the bus appears —
+# i2c-dev nodes are not tagged for systemd by default, so an After= on the
+# device unit alone would never fire.
+#
+# Stopped by arkade.service's ExecStartPre, which reaches this process as a
+# SIGTERM: the tool fills its bar, says "engine", holds that for 300 ms and
+# exits with the backlights still at 30%, which the engine's own startup card
+# picks up unchanged. There is deliberately no Conflicts= — that is symmetric,
+# so a crash card starting would stop the engine.
+#
+# Install (run on the Pi):
+#   sudo cp scripts/arkade-lcdboot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable arkade-lcdboot
+#
+# Takes effect from the next power-up. Do not start it by hand while the
+# engine is running — both would be writing the same panels.
+
+[Unit]
+Description=Årkade: the LCDs during boot
+DefaultDependencies=no
+After=systemd-modules-load.service dev-i2c\x2d1.device
+Before=arkade.service
+ConditionPathExists=/dev/i2c-1
+
+[Service]
+Type=simple
+# %h is the home of the user running the manager (root); the deployment lives in its arkade directory.
+WorkingDirectory=%h/arkade
+ExecStart=%h/arkade/arkade-lcdboot
+Restart=no
+TimeoutStopSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=sysinit.target

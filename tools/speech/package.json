@@ -1,0 +1,11 @@
+{
+  "name": "arkade-speech",
+  "private": true,
+  "type": "module",
+  "description": "Kokoro text-to-speech renderer driven by the speech Go package",
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "@huggingface/transformers": "3.8.1",
+    "kokoro-js": "1.2.1"
+  }
+}

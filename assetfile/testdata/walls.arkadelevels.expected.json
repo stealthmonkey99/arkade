@@ -1,0 +1,13 @@
+{
+  "arkade": 1,
+  "kind": "levels",
+  "name": "walls",
+  "description": "Fixture pack: one tiny room.",
+  "tags": [
+    "fixture"
+  ],
+  "generator": {
+    "tool": "assetfile-fixtures",
+    "version": "1.0.0"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "arkade": 1,
+  "kind": "hid",
+  "name": "dancepad",
+  "description": "A four-arrow dance pad plus a spinner and a pressure sensor.",
+  "generator": {
+    "tool": "assetfile-fixtures",
+    "version": "1.0.0"
+  },
+  "device": {
+    "vendor": 1356,
+    "product": 2508,
+    "name": "Dance pad"
+  },
+  "channels": [
+    {
+      "name": "pad.up",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 4
+      }
+    },
+    {
+      "name": "pad.down",
+      "kind": "button",
+      "report": {
+        "byte": 3,
+        "bit": 5
+      }
+    },
+    {
+      "name": "spinner",
+      "kind": "delta",
+      "report": {
+        "byte": 5,
+        "size": 2,
+        "signed": true
+      }
+    },
+    {
+      "name": "pressure",
+      "kind": "blob",
+      "report": {
+        "byte": 8,
+        "size": 32
+      }
+    }
+  ],
+  "standard": {
+    "pad.down": "joy.south",
+    "pad.up": "joy.north"
+  }
+}

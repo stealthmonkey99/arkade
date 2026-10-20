@@ -1,0 +1,219 @@
+{
+  "arkade": 1,
+  "kind": "hid",
+  "name": "dualshock-bt",
+  "description": "Sony DualShock 4 over Bluetooth: the same pad and the same fields as the USB profile, but its report 0x11 carries two header bytes before the payload, so every byte offset here is the USB one plus two. Byte 1 over USB is the left stick; over Bluetooth it is a constant, which is why the two cannot share a profile.",
+  "generator": {
+    "tool": "arkade-engine",
+    "version": "1.0.0"
+  },
+  "device": {
+    "vendor": 1356,
+    "product": 2508,
+    "name": "DualShock (Bluetooth)",
+    "directional": "dpad",
+    "bus": "bluetooth"
+  },
+  "channels": [
+    {
+      "name": "stick.x",
+      "kind": "axis",
+      "report": {
+        "byte": 3,
+        "bias": 128,
+        "divide": 10
+      }
+    },
+    {
+      "name": "stick.y",
+      "kind": "axis",
+      "report": {
+        "byte": 4,
+        "bias": 128,
+        "divide": 10
+      }
+    },
+    {
+      "name": "ps",
+      "kind": "button",
+      "report": {
+        "byte": 9
+      }
+    },
+    {
+      "name": "touchpad",
+      "kind": "button",
+      "report": {
+        "byte": 9,
+        "bit": 1
+      }
+    },
+    {
+      "name": "l1",
+      "kind": "button",
+      "report": {
+        "byte": 8
+      }
+    },
+    {
+      "name": "r1",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 1
+      }
+    },
+    {
+      "name": "l2",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 2
+      }
+    },
+    {
+      "name": "r2",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 3
+      }
+    },
+    {
+      "name": "share",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 4
+      }
+    },
+    {
+      "name": "options",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 5
+      }
+    },
+    {
+      "name": "l3",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 6
+      }
+    },
+    {
+      "name": "r3",
+      "kind": "button",
+      "report": {
+        "byte": 8,
+        "bit": 7
+      }
+    },
+    {
+      "name": "square",
+      "kind": "button",
+      "report": {
+        "byte": 7,
+        "bit": 4
+      }
+    },
+    {
+      "name": "cross",
+      "kind": "button",
+      "report": {
+        "byte": 7,
+        "bit": 5
+      }
+    },
+    {
+      "name": "circle",
+      "kind": "button",
+      "report": {
+        "byte": 7,
+        "bit": 6
+      }
+    },
+    {
+      "name": "triangle",
+      "kind": "button",
+      "report": {
+        "byte": 7,
+        "bit": 7
+      }
+    },
+    {
+      "name": "hat.x",
+      "kind": "axis",
+      "report": {
+        "byte": 7,
+        "bits": 4,
+        "map": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          -1,
+          -1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "name": "hat.y",
+      "kind": "axis",
+      "report": {
+        "byte": 7,
+        "bits": 4,
+        "map": [
+          -1,
+          -1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "standard": {
+    "circle": "b",
+    "cross": "a",
+    "hat.x": "dpad.x",
+    "hat.y": "dpad.y",
+    "l1": "l1",
+    "l2": "l2",
+    "l3": "c",
+    "options": "select",
+    "ps": "home",
+    "r1": "r1",
+    "r2": "r2",
+    "r3": "a",
+    "share": "start",
+    "square": "c",
+    "stick.x": "joy.x",
+    "stick.y": "joy.y",
+    "touchpad": "enter",
+    "triangle": "d"
+  }
+}

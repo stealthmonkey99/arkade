@@ -1,0 +1,6 @@
+# Build output compiled from a source beside it; GitHub collapses these in diffs.
+levels_gen.go linguist-generated
+manifest_gen.go linguist-generated
+*.wasm binary linguist-generated
+# Rendered from the SDK doc comments by sdk/tools/sdkdoc.
+sdk/docs/api/*.md linguist-generated

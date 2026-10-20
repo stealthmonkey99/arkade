@@ -1,0 +1,66 @@
+// The worked example for sdk/levels: a pack that exercises every piece of
+// the format at once — a legend with a space escape, every metadata value
+// type, a named layer over a second level, a second legend whose entries
+// carry colours, entity records, and the exits that join the two levels
+// into a graph.
+//
+// levels_gen.go beside this file is what the generator makes of it, checked
+// in exactly the way a cartridge checks in its own. Regenerate with:
+//
+//	go run ./tools/genlevelpack \
+//	    -dir sdk/levels/example -out sdk/levels/example/levels_gen.go -pkg example
+
+pack demo
+
+legend
+  #  wall
+  \s floor
+  @  start
+  *  coin
+  ~  water
+  o  lily
+  .  none
+
+// A second alphabet, for a layer whose cells are not terrain at all. Each
+// entry carries the colour the cartridge tints that cell with, so the
+// palette lives with the characters it names.
+legend palette
+  d deep    #103048
+  s shallow #2a6d8f
+  . clear
+
+level "FIRST STEPS"
+  par  6
+  hint keep left
+  dark false
+  |#######|
+  |#@   *#|
+  |#  #  #|
+  |#*   ~#|
+  |#######|
+  exit next "DEEP END"
+  ent sign 1 3 "mind the gap"
+
+level "DEEP END"
+  par  14
+  hint "mind the gap"
+  dark true
+  |#######|
+  |#@ ~~ #|
+  |# ~~~ #|
+  |#  ~ *#|
+  |#######|
+  exit back "FIRST STEPS"
+  ent duck 3 2 5 3 3 1
+  layer lilies
+  |.......|
+  |...o...|
+  |..o.o..|
+  |.......|
+  |.......|
+  layer tint palette
+  |.......|
+  |..ss...|
+  |.sdds..|
+  |...s...|
+  |.......|

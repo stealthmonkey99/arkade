@@ -1,0 +1,67 @@
+{
+  "arkade": 1,
+  "kind": "sprite",
+  "name": "hero",
+  "description": "Fixture sheet: three cels, one animation.",
+  "tags": [
+    "fixture"
+  ],
+  "generator": {
+    "tool": "assetfile-fixtures",
+    "version": "1.0.0"
+  },
+  "recipe": {
+    "note": "hand-authored fixture, not rendered by any tool"
+  },
+  "cels": [
+    {
+      "name": "idle",
+      "x": 0,
+      "y": 0,
+      "w": 8,
+      "h": 16,
+      "anchor": [
+        4,
+        16
+      ]
+    },
+    {
+      "name": "walk.0",
+      "x": 8,
+      "y": 0,
+      "w": 8,
+      "h": 16,
+      "anchor": [
+        4,
+        16
+      ]
+    },
+    {
+      "name": "walk.1",
+      "x": 16,
+      "y": 0,
+      "w": 8,
+      "h": 16,
+      "anchor": [
+        4,
+        16
+      ]
+    }
+  ],
+  "animations": [
+    {
+      "name": "walk",
+      "frames": [
+        {
+          "cel": "walk.0",
+          "holdMs": 90
+        },
+        {
+          "cel": "walk.1",
+          "holdMs": 90
+        }
+      ],
+      "loop": "cycle"
+    }
+  ]
+}

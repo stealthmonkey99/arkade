@@ -1,0 +1,22 @@
+{
+  "arkade": 1,
+  "kind": "glyph",
+  "name": "heart",
+  "description": "Filled heart for the lives counter.",
+  "generator": {
+    "tool": "assetfile-fixtures",
+    "version": "1.0.0"
+  },
+  "codepoint": 9829,
+  "rows": [
+    4,
+    10,
+    31,
+    31,
+    31,
+    14,
+    4,
+    0
+  ],
+  "category": "hud"
+}

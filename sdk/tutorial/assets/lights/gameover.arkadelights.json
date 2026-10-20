@@ -1,0 +1,41 @@
+{
+  "arkade": 1,
+  "kind": "lights",
+  "name": "gameover",
+  "description": "Two flashes of the whole panel, then dark: the run is over.",
+  "generator": {
+    "tool": "periphlab",
+    "version": "1.0.0"
+  },
+  "frames": [
+    {
+      "lamps": {
+        "p1": 63,
+        "p2": 63
+      },
+      "holdMs": 90
+    },
+    {
+      "lamps": {
+        "p1": 0,
+        "p2": 0
+      },
+      "holdMs": 90
+    },
+    {
+      "lamps": {
+        "p1": 63,
+        "p2": 63
+      },
+      "holdMs": 90
+    },
+    {
+      "lamps": {
+        "p1": 0,
+        "p2": 0
+      },
+      "holdMs": 90
+    }
+  ],
+  "loop": "once"
+}

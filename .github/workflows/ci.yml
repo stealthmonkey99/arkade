@@ -1,0 +1,123 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TINYGO_VERSION: "0.42.0"
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: make fmt-check
+
+  license:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - run: make license-check
+      - run: make binary-check
+
+  go:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      # oto (ALSA) and go-hid (libudev) are cgo and in the engine's import graph.
+      - name: Install cgo build deps
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev
+      - name: Build
+        run: go build ./...
+      - name: Vet
+        run: go vet ./...
+      - name: SDK API reference is current
+        run: go run ./sdk/tools/sdkdoc -check
+      - name: Test (goldens included)
+        run: go test ./...
+
+  # Each SDK package is its own module: its tinygo-only files declare
+  # bodyless go:wasmimport functions the host compiler rejects, so they
+  # stay out of the engine's `./...`.
+  sdk-modules:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            sdk/*/go.sum
+      - name: Install cgo build deps
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev
+      - name: Vet and test each SDK module
+        run: |
+          fail=0
+          for d in sdk/*/; do
+            [ -f "${d}go.mod" ] || continue
+            echo "::group::${d}"
+            if ! go -C "$d" vet ./... || ! go -C "$d" test ./...; then
+              echo "::error::module checks failed in ${d}"
+              fail=1
+            fi
+            echo "::endgroup::"
+          done
+          exit "$fail"
+
+  # Judge the shipped binary, rebuild, judge the rebuilt one. Byte equality
+  # only holds on the host that built the committed .wasm (carttest skips it
+  # here), so the behavioural tests against the rebuild are the drift check.
+  cartridges:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.27.x" # TinyGo 0.42 needs Go 1.25+; the modules still declare 1.23
+          cache-dependency-path: |
+            go.sum
+            sdk/*/go.sum
+      - name: Install cgo build deps
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev
+      - name: Install TinyGo ${{ env.TINYGO_VERSION }}
+        run: |
+          url="https://github.com/tinygo-org/tinygo/releases/download/v${TINYGO_VERSION}/tinygo_${TINYGO_VERSION}_amd64.deb"
+          wget -nv --tries=3 --retry-connrefused --waitretry=5 --timeout=30 "$url"
+          sudo dpkg -i "tinygo_${TINYGO_VERSION}_amd64.deb"
+          tinygo version
+      - name: Source and binary agree (template, tutorial)
+        run: |
+          go test -run 'TestSDKTemplateWasmMatchesSource' -v ./internal/cartridge/wasm/
+          go -C sdk/tutorial test -run 'WasmMatchesSource' -v ./...
+      - name: Tests against the checked-in wasm
+        run: |
+          go test ./internal/cartridge/wasm/
+          go -C sdk/template test ./...
+          go -C sdk/tutorial test -skip 'WasmMatchesSource' ./...
+      - name: Build template and tutorial with TinyGo
+        run: make sdk-template sdk-tutorial
+      - name: Tests against the rebuilt wasm
+        run: |
+          go test -skip 'WasmMatchesSource' ./internal/cartridge/wasm/
+          go -C sdk/tutorial test -skip 'WasmMatchesSource' ./...

@@ -1,0 +1,73 @@
+{
+  "arkade": 1,
+  "kind": "hid",
+  "name": "speedlink",
+  "description": "Speedlink Competition Pro USB joystick: four buttons and an analog stick centred on 128.",
+  "generator": {
+    "tool": "arkade-engine",
+    "version": "1.0.0"
+  },
+  "device": {
+    "vendor": 1848,
+    "product": 8727,
+    "name": "Speedlink",
+    "directional": "stick"
+  },
+  "channels": [
+    {
+      "name": "a",
+      "kind": "button",
+      "report": {
+        "byte": 0
+      }
+    },
+    {
+      "name": "b",
+      "kind": "button",
+      "report": {
+        "byte": 0,
+        "bit": 1
+      }
+    },
+    {
+      "name": "l1",
+      "kind": "button",
+      "report": {
+        "byte": 0,
+        "bit": 2
+      }
+    },
+    {
+      "name": "r1",
+      "kind": "button",
+      "report": {
+        "byte": 0,
+        "bit": 3
+      }
+    },
+    {
+      "name": "stick.x",
+      "kind": "axis",
+      "report": {
+        "byte": 1,
+        "bias": 128
+      }
+    },
+    {
+      "name": "stick.y",
+      "kind": "axis",
+      "report": {
+        "byte": 2,
+        "bias": 128
+      }
+    }
+  ],
+  "standard": {
+    "a": "a",
+    "b": "b",
+    "l1": "l1",
+    "r1": "r1",
+    "stick.x": "joy.x",
+    "stick.y": "joy.y"
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "arkade": 1,
+  "kind": "hid",
+  "name": "dragonrise",
+  "description": "Generic DragonRise arcade stick encoder: twelve buttons across two report bytes, stick centred on 127.",
+  "generator": {
+    "tool": "arkade-engine",
+    "version": "1.0.0"
+  },
+  "device": {
+    "vendor": 121,
+    "product": 6,
+    "name": "DragonRise",
+    "directional": "stick"
+  },
+  "channels": [
+    {
+      "name": "stick.x",
+      "kind": "axis",
+      "report": {
+        "byte": 0,
+        "bias": 127
+      }
+    },
+    {
+      "name": "stick.y",
+      "kind": "axis",
+      "report": {
+        "byte": 1,
+        "bias": 127
+      }
+    },
+    {
+      "name": "a",
+      "kind": "button",
+      "report": {
+        "byte": 5,
+        "bit": 4
+      }
+    },
+    {
+      "name": "b",
+      "kind": "button",
+      "report": {
+        "byte": 5,
+        "bit": 5
+      }
+    },
+    {
+      "name": "c",
+      "kind": "button",
+      "report": {
+        "byte": 5,
+        "bit": 6
+      }
+    },
+    {
+      "name": "d",
+      "kind": "button",
+      "report": {
+        "byte": 5,
+        "bit": 7
+      }
+    },
+    {
+      "name": "l1",
+      "kind": "button",
+      "report": {
+        "byte": 6
+      }
+    },
+    {
+      "name": "r1",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 1
+      }
+    },
+    {
+      "name": "l2",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 2
+      }
+    },
+    {
+      "name": "r2",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 3
+      }
+    },
+    {
+      "name": "select",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 4
+      }
+    },
+    {
+      "name": "start",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 5
+      }
+    },
+    {
+      "name": "aux1",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 6
+      }
+    },
+    {
+      "name": "aux2",
+      "kind": "button",
+      "report": {
+        "byte": 6,
+        "bit": 7
+      }
+    }
+  ],
+  "standard": {
+    "a": "a",
+    "aux1": "aux1",
+    "aux2": "aux2",
+    "b": "b",
+    "c": "c",
+    "d": "d",
+    "l1": "l1",
+    "l2": "l2",
+    "r1": "r1",
+    "r2": "r2",
+    "select": "select",
+    "start": "start",
+    "stick.x": "joy.x",
+    "stick.y": "joy.y"
+  }
+}

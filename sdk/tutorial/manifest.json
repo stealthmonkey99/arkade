@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "abi": 1,
+  "slug": "catcher",
+  "title": "Catcher",
+  "publisher": "arkade",
+  "author": "Årkade",
+  "version": "1.2.0",
+  "description": "Catch the falling fruit before it hits the ground",
+  "tags": ["action"],
+  "players": ["1p"],
+  "audience": "all-ages",
+  "capabilities": [],
+  "visibility": "public",
+  "assets": {
+    "lights": ["assets/lights/gameover.arkadelights.json"]
+  },
+  "icon": "assets/icon.png",
+  "links": { "source": null }
+}

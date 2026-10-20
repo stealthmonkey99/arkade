@@ -1,0 +1,40 @@
+{
+  "arkade": 1,
+  "kind": "lights",
+  "name": "pulse",
+  "description": "Win pulse: two flashes of every lamp, then the D button alone.",
+  "tags": [
+    "fixture"
+  ],
+  "generator": {
+    "tool": "assetfile-fixtures",
+    "version": "1.0.0"
+  },
+  "frames": [
+    {
+      "lamps": {
+        "p1": 63
+      },
+      "holdMs": 90
+    },
+    {
+      "lamps": {
+        "p1": 0
+      },
+      "holdMs": 90
+    },
+    {
+      "lamps": {
+        "p1": 63
+      },
+      "holdMs": 90
+    },
+    {
+      "lamps": {
+        "p1": 8
+      },
+      "holdMs": 200
+    }
+  ],
+  "loop": "once"
+}

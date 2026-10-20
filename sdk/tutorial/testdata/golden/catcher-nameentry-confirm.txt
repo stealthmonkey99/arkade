@@ -1,0 +1,74 @@
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabccccc###c#c#c###c###cccccc##cc#cc#c#c###c###cccccceaaaaaa
+aaaaaabccccc#c#c#c#cc#ccc#cccccc#ccc#c#c###c#ccccc#cccccceaaaaaa
+aaaaaabccccc#c#c#c#cc#ccc#cccccc#c#c###c###c###cc#ccccccceaaaaaa
+aaaaaabccccc###c#c#cc#ccc#cccccc#c#c#c#c#c#c#cccccccccccceaaaaaa
+aaaaaabccccccc#c###c###cc#ccccccc##c#c#c#c#c###cc#ccccccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabccccccfcccccmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmccceaaaaaa
+aaaaaabccccfhhhfcccm.................................mccceaaaaaa
+aaaaaabccccfhhhfcccm.................................mccceaaaaaa
+aaaaaabcccfhhhhhfccm.................................mccceaaaaaa
+aaaaaabccccfhhhfcccm.................................mccceaaaaaa
+aaaaaabccccfhhhfcccm.................................mccceaaaaaa
+aaaaaabccccccfcccccmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaabcLcLcLLLcLcccLLccccccLLLcLLLcccccLLLcLcLcLLLcLLLcceaaaaaa
+aaaaaabcLcLcLcLcLcccLcLccccccLccLcLcccccLcLcLcLccLcccLccceaaaaaa
+aaaaaabcLLLcLcLcLcccLcLccccccLccLcLcccccLcLcLcLccLcccLccceaaaaaa
+aaaaaabcLcLcLcLcLcccLcLccccccLccLcLcccccLLLcLcLccLcccLccceaaaaaa
+aaaaaabcLcLcLLLcLLLcLLcccccccLccLLLcccccccLcLLLcLLLccLccceaaaaaa
+aaaaaabcccccccccccccccccccccccccccccccccccccccccccccccccceaaaaaa
+aaaaaaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaiaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaiaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaajjjaaakkkaaakkkaaiaiaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaiaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+--- legend ---
+a = #03050b/ff
+b = #58585d/ff
+c = #1a1a20/ff
+e = #0f0f13/ff
+f = #460a0a/ff
+h = #8c1e1e/ff
+i = #007200/ff
+j = #727200/ff
+k = #363636/ff

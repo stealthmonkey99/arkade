@@ -1,0 +1,8 @@
+# Starts arkade-lcdboot.service the moment I2C bus 1 appears, however early
+# or late in boot that is. i2c-dev nodes are not tagged for systemd by
+# default, so the service's own After= on the device unit would never wait.
+#
+# Install (run on the Pi):
+#   sudo cp scripts/99-arkade-lcdboot.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload
+ACTION=="add", SUBSYSTEM=="i2c-dev", KERNEL=="i2c-1", TAG+="systemd", ENV{SYSTEMD_WANTS}+="arkade-lcdboot.service"
