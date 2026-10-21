@@ -24,6 +24,12 @@ everything below, so here's the deal up front.
   PRs: you played a game, something bugged you, you fixed it. Bug
   fixes, polish on an existing game, docs corrections, a device profile
   for your gamepad — these are exactly the PRs that merge.
+- **This repository is a published mirror.** Development happens in a
+  private upstream repository that also holds the cabinet's unreleased
+  games and tools; each release lands here as one commit. A merged PR is
+  applied there with you as the author and appears here in the next
+  release commit, which is when the PR gets closed with a pointer to it.
+  Issues and Discussions are read here directly.
 
 ## Hard constraints
 
