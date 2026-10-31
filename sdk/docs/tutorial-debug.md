@@ -30,6 +30,32 @@ leaves the previous `.rcart` where it was. The browser player at
 [arkade.build](https://arkade.build) plays the same `.rcart` by drag
 and drop.
 
+## Iterate from the browser
+
+To skip the rebuild-and-drag step, let the hosted player watch the
+cartridge. From the engine checkout (it needs TinyGo on your `PATH`, as
+`make rcart` does):
+
+```sh
+go run ./tools/devserve ../my-cartridges/catcher
+```
+
+`devserve` builds the cartridge with its own Makefile, serves the result
+on `127.0.0.1:8134`, and prints a link:
+
+```
+devserve: open https://arkade.build/play?dev=http://127.0.0.1:8134
+```
+
+Open it. The player loads the cartridge from your machine; edit a source
+file and save, and `devserve` rebuilds and the cartridge reloads in
+place. If the build fails, a banner over the player says so and the last
+good build keeps running; the compiler's output is in the terminal where
+`devserve` runs. Fix the error, save again, and the banner clears.
+Ctrl-C stops it. The cartridge directory needs the `manifest.json`,
+`go.mod` and `Makefile` that `sdk/template` gives you. In Safari, add
+`-tls`, as for `assetbridge` in [the assets tutorial](tutorial-assets.md#open-the-lab).
+
 This is where you actually play it. Catch things. Miss deliberately.
 Mash the dash while it is dark and check the light matches. Let the
 score qualify and enter initials. Hold B in the middle of a run and
@@ -65,17 +91,24 @@ things can:
 2. **The debug combo, on the pads.** Hold **Aux1** and push
    **UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT**. The host detects this
    itself, in its own copy of the detector, over the record stream it is
-   already recording — the combo is guest-side and has no host call
-   behind it.
+   already recording, so it works in any cartridge and needs no call
+   from the guest. (`cartlib.CheatCode` is a separate guest-side
+   detector of the same combo, for a cartridge's own debug shortcut.)
 3. **The dashboard**, without touching the pad at all. It listens on
    loopback only, and its mutating routes (this one included) are
    disabled unless `ARKADE_HTTP_TOKEN` is set before `./arkade` starts —
-   set your own before launch and reuse it:
+   set your own before launch and reuse it. Start the engine in a second
+   terminal, from the engine checkout, with the token exported there:
 
 ```sh
 export ARKADE_HTTP_TOKEN=$(openssl rand -hex 24)   # set before launching ./arkade
-./arkade &
+./arkade --cartridges ../my-cartridges/catcher
+```
 
+and in the first terminal, with the same token exported, ask for the
+dump:
+
+```sh
 curl -sX POST -H "Authorization: Bearer $ARKADE_HTTP_TOKEN" \
   "http://localhost:8080/api/flight/dump?note=fruit+fell+through+the+basket"
 ```
@@ -94,13 +127,14 @@ the fruit count.)
 ### Replaying it
 
 ```sh
-./arkade --replay data/flight/<time>-cart_catcher-manual.arkflt
+./arkade --cartridges ../my-cartridges/catcher \
+  --replay data/flight/<time>-cart_catcher-manual.arkflt
 ```
 
 It prints the header before anything runs:
 
 ```text
-replay: cart/catcher "Catcher" version "1.2.0"
+replay: cart/catcher "Catcher" version "0.1.0"
 replay: recorded <time> on darwin/arm64 (dev), dumped <time> because: manual
 replay: note: fruit fell through the basket
 replay: 9214 events (9012 frames, 190 input records, 12 rng draws), seed 4815162342, 30fps
@@ -394,19 +428,20 @@ preflight's `tests` check runs the same command.
 
 ## Preflight
 
-One command grades the whole cartridge against the platform's rules:
+One command grades the whole cartridge against the platform's rules.
+Run it from the engine checkout, not the cartridge directory:
 
 ```sh
 ARKADE_CARTRIDGE_ROOTS=../my-cartridges go run ./tools/preflight catcher
 ```
 
 ```text
-catcher 0.2.0 — Catcher
+catcher 0.1.0 — Catcher
   skip config          no preflight.json — scanned with the defaults
   pass golden-rules    10 TinyGo-compiled files clean
   pass wav-audibility  5 WAV(s) clear the 150 Hz / 50% floor
   pass sprite-alpha    4 PNG(s) (2 under assets/sprites, where alpha is the hitbox), alpha channels clean
-  pass manifest        schema-1 valid, 0.2.0, manual current
+  pass manifest        schema-1 valid, 0.1.0, manual current
   pass levels          generated level files current (tools/genlevels -check)
   pass bundle          packs to a loadable .rcart: catcher, 10 asset(s), 58 KiB wasm
   pass lcd             2 SetText call(s) fit 16 columns and the CGRAM budget
@@ -487,7 +522,7 @@ hardware. [Manifests & packaging](packaging.md) has the format and the
 Drag the `.rcart` onto the hosted player at
 [arkade.build](https://arkade.build) exactly like a bare `.wasm`, now
 with working sound. On a cabinet, copy it
-in and restart the service — [Getting started](getting-started.md#7-put-it-on-a-cabinet)
+in and restart the service — [Manifests & packaging](packaging.md#installing)
 has the atomic-rename recipe, and a USB stick with the bundle at its
 root works the same way.
 
@@ -509,8 +544,8 @@ is left is mostly depth:
   use, and the rest of the peripheral surface.
 - **Steal from real games.** In the `arkade-cartridges` repo, `life` is
   the simplest complete cartridge and `snake` shows everything — menus,
-  two players, scores, sound, an attract mode, and a test spread with an
-  input mash and PNG dump hooks for iterating on pixel art.
+  two players, scores, sound, an attract mode, and a test spread of
+  goldens, determinism checks and scripted journeys.
 
 The finished cartridge from this tutorial is at `sdk/tutorial/`, with
 its own `README.md` describing how it is wired.

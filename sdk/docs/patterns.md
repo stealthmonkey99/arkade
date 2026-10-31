@@ -16,7 +16,7 @@ opens the `ui.HoldConfirm` flow (press → release arms → hold ~1 s →
 confirm on release); title/menu/game-over B acts immediately — except
 over a **qualifying name entry**, where the placement isn't in the table
 yet and a fumbled B would throw it away, so B opens the confirm there too
-(`cartridges/snake`'s `handleGameOverInput` is the reference). This
+(`cartridges/snake`'s `handleNameEntryInput` in `input.go` is the reference). This
 applies to every cartridge with a name entry.
 The confirm you raise is the one your cartridge *already* means by B, so
 a completed hold goes wherever that overlay has always gone (out of the

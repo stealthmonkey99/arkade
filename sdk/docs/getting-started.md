@@ -22,6 +22,18 @@ brew install tinygo-org/tools/tinygo   # macOS
 # other platforms: https://tinygo.org/getting-started/install/
 ```
 
+Homebrew installs the latest TinyGo, so check that `tinygo version`
+reports 0.42.0 before you build.
+
+Then clone the engine into the folder that will also hold your
+cartridge library (`my-cartridges/`, created in the next step), so the
+two sit side by side:
+
+```sh
+git clone https://github.com/stealthmonkey99/arkade
+cd arkade
+```
+
 ## 1. Copy the template
 
 A game lives in a **cartridge library** of your own: a folder beside the
@@ -183,6 +195,18 @@ page. Keyboard arrows are the joystick, Enter/Space are A, Escape is B.
 Every change is rebuild-and-drag — no engine rebuild, ever, and nothing
 to install.
 
+**In the browser, reloading on save**: from the engine checkout, run
+
+```sh
+go run ./tools/devserve ../my-cartridges/my-game
+```
+
+and open the `https://arkade.build/play?dev=…` link it prints. `devserve`
+rebuilds the cartridge on every save and the player reloads it in place;
+a failed build shows in a banner while the last good build keeps
+running. [Part 4 of the tutorial](tutorial-debug.md#iterate-from-the-browser)
+has the detail.
+
 **In your terminal** (the console renderer — the same engine binary
 the cabinet runs, drawing the LED matrix as colored text). From the
 engine checkout:
@@ -240,9 +264,10 @@ test needs the engine in `go.mod` —
 `require github.com/stealthmonkey99/arkade v0.1.0` and
 `replace github.com/stealthmonkey99/arkade => ../../arkade`, plus
 `replace github.com/stealthmonkey99/arkade/sdk/levels => ../../arkade/sdk/levels`
-because the engine's own replace for that module does not carry over —
-then `go mod tidy`. Only host-side test code imports it; nothing in the
-TinyGo build sees it. That determinism check is the ABI's core promise — see [ABI
+to keep `sdk/levels` on your checkout too (the engine's own replace for
+that module does not carry over, so without this line `v0.1.0` comes from
+the module proxy) — then `go mod tidy`. Only host-side test code imports
+it; nothing in the TinyGo build sees it. That determinism check is the ABI's core promise — see [ABI
 reference](abi.md#determinism) for what your game must (and must not)
 do to keep it. Regenerate snapshots after intentional visual changes
 with `UPDATE_GOLDENS=1 go test ...`.
@@ -253,9 +278,9 @@ A bare `.wasm` is a valid cartridge with no assets. To make some, open
 the **asset lab** — seven browser tools: **spritelab** for pixel art
 and animation, **soundlab** for synthesized effects and music loops,
 plus glyphlab, hidlab, periphlab, levellab and fsmlab. It runs hosted
-at `arkade.build/dev/tools`, keeping its files in the browser: import
-the cartridge's files, edit them, and export them back into the
-cartridge's `assets/`. A small
+at `arkade.build/dev/tools`. Connect your cartridge folder from a
+tool's toolbar and it reads and saves the cartridge's `assets/` files
+directly. A small
 generator you run from the cartridge (`tools/gen-sfx` for the audio, for
 instance) turns the rest into what the build consumes. The
 [tutorial](tutorial-assets.md) walks the whole path.
@@ -274,7 +299,8 @@ identical error, instead of failing days later on a cabinet. Format
 details and caps: [Manifests & packaging](packaging.md).
 
 The web player accepts the `.rcart` by drag-and-drop exactly like the
-bare `.wasm`, now with working sound and sprite assets.
+bare `.wasm`, now with working sound and sprite assets; `devserve` packs
+and serves the `.rcart` for you.
 
 ## 7. Put it on a cabinet
 
@@ -295,8 +321,8 @@ bump forces a reread. `sdk/tutorial/MANUAL.md` is a complete example,
 and the style guide is
 [docs/MANUALS.md](https://github.com/stealthmonkey99/arkade-cartridges/blob/main/docs/MANUALS.md)
 in the cartridges repo. The template ships a `MANUAL.md` to adapt (title,
-pitch, footer version) and a `manual-icon.png` of its own;
-`ARKADE_CARTRIDGE_ROOTS=../my-cartridges go run ./tools/manualicon`
+pitch, footer version) and a `manual-icon.png` of its own; from the
+engine checkout, `ARKADE_CARTRIDGE_ROOTS=../my-cartridges go run ./tools/manualicon`
 rewrites `manual-icon.png` for every cartridge in the library from its
 `assets/icon.arkadesprite.png`, or `assets/icon.png` when there is none.
 
@@ -318,7 +344,7 @@ report line by line.
 - **[Build a whole game, step by step](tutorial.md)** — the follow-along
   tutorial. One small complete cartridge from this template to a packed
   bundle: sprites drawn in spritelab, sounds synthesized in soundlab,
-  hot-reload iteration, golden tests, replay, and preflight. Start here
+  a rebuild-and-run loop, golden tests, replay, and preflight. Start here
   if you would rather be shown than told.
 - The symbol-by-symbol API reference is generated from the Go doc
   comments into [api/cartlib.md](api/cartlib.md) and its sibling pages

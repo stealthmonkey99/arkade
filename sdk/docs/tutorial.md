@@ -4,7 +4,7 @@
 playing in about ten minutes. This is the other thing: one small,
 complete game, built from the starter template to a packed `.rcart`,
 using the whole toolchain on the way — the sprite editor, the sound
-designer, the hot-reloading dev server, the flight recorder, golden
+designer, the build-and-run loop, the flight recorder, golden
 tests and preflight.
 
 It comes in four parts:
@@ -95,10 +95,11 @@ Then, exactly as [Getting started](getting-started.md#1-copy-the-template)
 describes, make it yours — four edits, in this order.
 
 **1. `go.mod`** — rename the module and point the two `replace` lines
-at the engine checkout. The SDK modules are not published or tagged
-yet, so a local checkout plus these lines is how a cartridge finds them
-today; both lines are needed even though only `cartlib` is imported
-directly, because `replace` directives are not transitive:
+at the engine checkout, so the build uses the code you cloned (the
+tagged `v0.1.0` modules resolve without them too — see
+[Module resolution](../README.md#module-resolution)). Keep both lines
+even though only `cartlib` is imported directly, because `replace`
+directives are not transitive:
 
 ```go-mod file=go.mod
 module arkade-catcher-cartridge
@@ -1315,8 +1316,9 @@ The other thing worth noticing is what is *not* in the machine:
 `Elapsed` is "time since this screen was entered"; a repeating or
 stepping accumulator is a different thing and stays a plain field.
 
-<a id="when-not-to-reach-for-it"></a>
-**When not to reach for it.** `sdk/fsm` is opt-in and it is not a
+#### When not to reach for it
+
+`sdk/fsm` is opt-in and it is not a
 line-count win — adopting it rarely makes a cartridge shorter. Its
 value is that four bug classes become impossible or caught: a screen
 entered without its peripherals, a modal resumed to the wrong screen, a

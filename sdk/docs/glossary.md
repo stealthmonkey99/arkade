@@ -50,8 +50,8 @@ non-code assets: spritelab (pixel art and sprite sheets), soundlab
 (HID controller debugging and profiles), periphlab (the cabinet's
 peripherals live, and button-light choreography), levellab (`.arkadelevels`
 packs) and fsmlab (`sdk/fsm` screen machines). All seven are hosted at
-arkade.build/dev/tools; each keeps its files in the browser, with
-Import and Export to move them in and out of a cartridge. See
+arkade.build/dev/tools; connect a cartridge folder from a tool's toolbar
+and it reads and saves the cartridge's asset files there. See
 [Open the lab](tutorial-assets.md#open-the-lab).
 
 ## Attract screen
@@ -66,7 +66,7 @@ plays zero sounds and touches no LCDs or lights. See
 ## Browser player (the)
 
 The wasm host running at arkade.build: a browser tab that instantiates a
-cartridge's `.wasm` (or `.rcart`) directly and plays it via drag-and-drop,
+cartridge's `.wasm` (or `.rcart`) directly and plays it via drag-and-drop or from `devserve`,
 with keyboard arrows standing in for the joystick. It implements the same
 ABI as the cabinet, so a cartridge needs no browser-specific code, and it
 ports the engine's player strategies, gating and rotation included. See [4. Play it](getting-started.md#4-play-it).
@@ -256,10 +256,10 @@ or scores. See [Design rules](abi.md#design-rules).
 
 ## Hosted vs local
 
-Every asset-lab tool is hosted at arkade.build/dev/tools, compiled to
-wasm and keeping its files in the browser, which is why each has
-Import/Export buttons: import a cartridge's files, edit them, and export
-them back into the cartridge's directory. See [Open the lab](tutorial-assets.md#open-the-lab).
+Every asset-lab tool is hosted at arkade.build/dev/tools and runs in the
+browser. Its toolbar's folder control connects a cartridge folder on your
+disk, through browser folder access or the `assetbridge` command, so the
+tool saves straight into the cartridge's `assets/`. See [Open the lab](tutorial-assets.md#open-the-lab).
 
 ## Keypress vs keydown
 

@@ -636,12 +636,14 @@ And the tooling, which is more fun than reading:
   16×2 LCD, dot by dot), hidlab (gamepad debugging), periphlab (live
   inputs and button-light choreography), levellab (the level-pack grid
   editor) and fsmlab (the screen-state-machine editor). Hosted on the
-  site; import a cartridge's files, edit them, and export them back
-  into its directory.
+  site; connect your cartridge folder from a tool's toolbar and it
+  reads and saves the cartridge's asset files there.
 - **The terminal loop** — `make rcart DIR=../my-cartridges/<slug>`
   builds and packs a cartridge, and `./arkade --cartridges
   ../my-cartridges` runs it in a desktop window; the browser player at
-  [arkade.build](https://arkade.build) plays the same `.rcart`.
+  [arkade.build](https://arkade.build) plays the same `.rcart`, and
+  `go run ./tools/devserve ../my-cartridges/<slug>` has it reload the
+  cartridge on every save.
 - **The reference cartridges** — in the
   [arkade-cartridges](https://github.com/stealthmonkey99/arkade-cartridges)
   repo, `cartridges/life` is the simplest complete game and

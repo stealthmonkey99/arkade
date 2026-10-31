@@ -247,8 +247,9 @@ for another game to want. **The test is not "who uses it today" but
 
 ## Editing one
 
-Open glyphlab at `arkade.build/dev/tools` and import the cartridge's
-glyph files; they appear in the gallery beside the engine's, one list,
+Open glyphlab at `arkade.build/dev/tools` and connect the cartridge folder
+([Open the lab](tutorial-assets.md#open-the-lab)); its
+glyph files appear in the gallery beside the engine's, one list,
 because that is how the cabinet resolves them. Click either kind to open it; the metadata panel is the same three
 fields for both. **Save to cart** writes the file into the cartridge's
 `assets/glyphs/` through this same `assetfile` package, so what the tool

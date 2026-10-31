@@ -399,6 +399,6 @@ smooth rather than steppy, is a look-at-it question, and that button is
 how you look at it.
 
 Save writes the file into the current cartridge's `assets/lights/` and
-prints the `assets.lights` line to add to the manifest. On the hosted
-face there is no cartridge and no local process, so Download and Open a
-file are the two halves that still work.
+prints the `assets.lights` line to add to the manifest. With a cartridge
+folder connected ([Open the lab](tutorial-assets.md#open-the-lab)) it lands
+there; with none, Download and Open a file are the two halves that work.

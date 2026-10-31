@@ -15,12 +15,32 @@ diff.
 ## Open the lab
 
 Open `arkade.build/dev/tools`. The seven tools — spritelab, soundlab,
-glyphlab, hidlab, periphlab, levellab and fsmlab — are compiled to wasm
-and keep their files in the browser, so each has **Import** and
-**Export** buttons: import the files you want to edit (the catcher's
-`assets/sprites/` PNGs for spritelab, its `assets/` sounds for
-soundlab), edit them, and export them back into the cartridge's
-directory.
+glyphlab, hidlab, periphlab, levellab and fsmlab — run in the browser,
+and each has a **folder** control in its toolbar that connects the
+cartridge folder on your disk. Where the browser offers folder access
+(Chrome and Edge), choose the folder there: `my-cartridges`, or the
+catcher's own directory. In any other browser, run the file bridge from
+the engine checkout:
+
+```sh
+go run ./tools/assetbridge ../my-cartridges/catcher
+```
+
+It prints a link ending in `#bridge=…&token=…`; open it and the tool
+connects. The token is shown only in your terminal and dies when you stop
+the bridge with Ctrl-C.
+
+Safari refuses plain `http` to your own machine from an `https` page, so
+there add `-tls`. The first run makes a certificate that is valid only for
+`localhost` and `127.0.0.1` and prints the one command that trusts it in
+your keychain; run that once, and every later `-tls` run reuses it.
+
+Once a folder is connected, pick the catcher in the tool's cartridge
+picker. The tool then reads and saves that cartridge's files in place
+(`assets/sprites/` PNGs for spritelab, `assets/` sounds for soundlab),
+so there is nothing to import or export. With no folder connected, a tool
+keeps its files in the browser. The bridge writes only under `assets/`
+and never touches your source or manifest.
 
 ## Draw the fruit
 
@@ -68,12 +88,10 @@ tutorial/assets/sprites/fruit.png
 
 *The fruit as the cabinet lights it: 5×5 pixels, one drawing.*
 
-Press **Save** (or `Ctrl+S`), then **Export** to write the file back
-into the cartridge's `assets/sprites/`. A plainly named file holding one cel with
+Press **Save** (or `Ctrl+S`) to write the file into the cartridge's
+`assets/sprites/`. A plainly named file holding one cel with
 nothing to add is written as an ordinary PNG with no metadata at all —
-byte for byte what spritelab wrote before sheets existed. (The
-**Import**/**Export** buttons exist because a browser tab has no
-directory to save into.)
+byte for byte what spritelab wrote before sheets existed.
 
 ## Draw the catcher as an animation strip
 
@@ -244,7 +262,7 @@ Give each generator a target in the `Makefile`, and list them as
 nothing:
 
 ```make
-.PHONY: build test rcart clean sheet sfx
+.PHONY: build levels manifest test rcart clean sheet sfx
 
 sheet:
 	go run ./tools/gen-sheet
@@ -1395,7 +1413,9 @@ Catcher writes plain `.wav` because `peripherals.go` has been asking for
 `catch.wav` by that name since part 1, and because the `Patch` values
 above are its recipe, checked in beside the output and rendered by the
 same `sfxlib` soundlab uses. Life and Snake go the one step
-further, and a new cartridge should: `sfxlib.WriteAssetFile` in place of
+further: their `.arkadesound.wav` files carry the recipe and are
+themselves the source, with no generator beside them. A new generator
+should do the same: `sfxlib.WriteAssetFile` in place of
 `WriteFile`, `sfxlib.SoundFileName(name)` for the path, and
 `p.MarshalParams(name)` as the recipe node's `Params`, so the file
 carries what made it and soundlab opens it without your generator. The
@@ -2022,8 +2042,8 @@ resolution, and it means you never have to remember a `StopLights` before
 writing a lamp by hand.
 
 The editor for these files is **periphlab** — one of the lab's seven
-tools (import the cartridge's `assets/lights/` files, edit, and export them
-back). It choreographs against a real cabinet: toggle the six lamps per
+tools (connect the cartridge folder and it edits the `assets/lights/` files
+in place). It choreographs against a real cabinet: toggle the six lamps per
 frame, set each hold, and push the sequence down the dashboard relay to
 watch it play on actual buttons before it is ever in a bundle.
 

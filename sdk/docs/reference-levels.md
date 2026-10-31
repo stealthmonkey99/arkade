@@ -173,7 +173,7 @@ touching a pack file that does not want the metadata.
 
 ## Editing one
 
-Open levellab at `arkade.build/dev/tools` and import the pack.
+Open levellab at `arkade.build/dev/tools` and connect the cartridge folder ([Open the lab](tutorial-assets.md#open-the-lab)), then pick the pack.
 
 The **Asset info** panel shows and edits `name`, `description` and
 `tags` for the open pack, next to the grid, legend and metadata panels
