@@ -155,7 +155,7 @@ nothing. Check the return value where there is one.
   (`cartlib.PushPlayerStrategy`).
 - **Nothing restores LCD text or lamps for you** — every path into a
   screen, including the way out from under an overlay, re-asserts them
-  ([buttons and lights](patterns.md#buttons-and-lights)).
+  ([buttons and lights](patterns-hardware.md#buttons-and-lights)).
 
 ## Input
 

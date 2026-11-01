@@ -7,7 +7,7 @@ A new game never needs an engine rebuild.
 The step-by-step material lives in the SDK documentation set, `sdk/docs/`
 (also rendered at arkade.build `/dev/docs`). Read it in this order:
 
-1. [Getting started](../sdk/docs/getting-started.md): template to a packed
+1. [Quick Start Guide](../sdk/docs/getting-started.md): template to a packed
    `.rcart` playing in your browser and terminal.
 2. [The tutorial](../sdk/docs/tutorial.md) and its sequels
    ([assets](../sdk/docs/tutorial-assets.md),

@@ -84,8 +84,14 @@ const (
 	walkStep = 2
 	fallMax  = 40
 
+	// waveNameSteps is the empty sky before row 0 fires, while the wave's
+	// name holds the panel.
+	waveNameSteps = 60
+
 	// startX is where reset() parks the catcher, and therefore where the
-	// solver's player begins the wave.
+	// solver's player begins the wave. Later waves start wherever the last
+	// one left the basket, but waveNameSteps of walking crosses the whole
+	// panel, so the start column cannot change what is reachable.
 	startX = (fbW - catcherW) / 2
 )
 
@@ -123,7 +129,7 @@ func schedule(lv *levels.Level, cadence int) []drop {
 		row := lv.Row(y)
 		for x := 0; x < len(row); x++ {
 			if row[x] == cellFruit {
-				out = append(out, drop{row: y, lane: x, x: laneX(x, lv.W), spawn: y * cadence})
+				out = append(out, drop{row: y, lane: x, x: laneX(x, lv.W), spawn: waveNameSteps + y*cadence})
 			}
 		}
 	}

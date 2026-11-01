@@ -46,13 +46,6 @@ func playOver() {
 func startMusic() { cartlib.PlaySound(sndTheme, cartlib.PlaySoundForever) }
 func stopMusic()  { cartlib.StopSound(sndTheme) }
 
-// lcdIntervalMicros throttles the readout to about 4 Hz. A 16x2
-// character LCD cannot legibly redraw at frame rate, and a readout
-// driven by the sim rather than by an event will blow past that without
-// anyone noticing. Events (a catch, a miss, a screen change) push
-// immediately instead of waiting for the next tick.
-const lcdIntervalMicros uint64 = 250_000
-
 // The basket. A 16x2 character LCD draws ASCII out of the chip's own mask
 // ROM and nothing else, so anything pictorial has to be uploaded as a 5x8
 // bitmap first. The engine ships a table of those for the runes games kept
@@ -94,11 +87,11 @@ func defineGlyphs(s *cartlib.Setup) {
 // LCD text, built once: formatting a fresh string or []byte every frame
 // would allocate under an allocator that never gives memory back.
 var (
-	lcdTitle1 = []byte("CATCHER ֍")
-	lcdTitle2 = []byte("GREEN TO PLAY")
-	lcdOver1  = []byte("GAME OVER")
-	lcdName1  = []byte("TOP 10!")
-	lcdName2  = []byte("YOUR INITIALS")
+	lcdTitle1  = []byte("CATCHER ֍")
+	lcdTitle2  = []byte("GREEN TO PLAY")
+	lcdNewBest = []byte("NEW BEST!")
+	lcdName1   = []byte("TOP 10!")
+	lcdName2   = []byte("YOUR INITIALS")
 
 	// The hearts come from the engine's built-in glyph table — no
 	// definition needed, they have been there for years. A rune in NEITHER
@@ -118,15 +111,19 @@ var (
 // The two prefixes lcdScore is built with. In play the basket names the
 // number without spending four of sixteen columns on the word — the panel
 // is already showing the basket, so the LCD reads as the same object's
-// tally. On the game-over screen the run is over and the word is the point,
-// so it says SCORE.
+// tally. At game over the panel's banner already says GAME OVER and shows
+// the score, so the LCD carries what the panel does not: the best score on
+// the cabinet's table, and whether this run just beat it.
 const (
 	scorePrefixPlaying = "֍ "
-	scorePrefixOver    = "SCORE "
+	scorePrefixBest    = "BEST "
 )
 
-func (g *catcherGame) tickLCD() {
-	if g.lcdAcc < lcdIntervalMicros {
+// refreshReadout runs every playing frame and writes the LCD only when the
+// numbers on it are out of date. Score and lives move on a catch or a miss,
+// a few times a run, so nearly every call returns at the guard.
+func (g *catcherGame) refreshReadout() {
+	if g.sim.score == g.shownScore && g.sim.lives == g.shownLives {
 		return
 	}
 	g.pushLCD()
@@ -136,20 +133,26 @@ func (g *catcherGame) tickLCD() {
 // transition calls it directly, so the display is never left showing the
 // previous screen's text.
 func (g *catcherGame) pushLCD() {
-	g.lcdAcc = 0
-	if g.seat == cartlib.SeatNone {
-		return // a keyboard player has no seat, and no LCD in front of them
-	}
 	seat := g.seat
+	if seat == cartlib.SeatNone {
+		// The browser's shared keyboard sits at no seat, and the page draws
+		// both LCDs: the score goes on both rather than on neither.
+		seat = cartlib.SeatBoth
+	}
 	switch g.machine.State() {
 	case stTitle:
 		cartlib.SetTextBytes(seat, lcdTitle1, lcdTitle2)
 	case stPlaying:
 		n := formatScore(scorePrefixPlaying, g.sim.score)
 		cartlib.SetTextBytes(seat, lcdScore[:n], lcdLives[clampLives(g.sim.lives)])
+		g.shownScore, g.shownLives = g.sim.score, g.sim.lives
 	case stOver:
-		n := formatScore(scorePrefixOver, g.sim.score)
-		cartlib.SetTextBytes(seat, lcdOver1, lcdScore[:n])
+		best, line2 := g.top.Score, []byte(nil)
+		if g.sim.score > best {
+			best, line2 = g.sim.score, lcdNewBest
+		}
+		n := formatScore(scorePrefixBest, best)
+		cartlib.SetTextBytes(seat, lcdScore[:n], line2)
 	case stName:
 		cartlib.SetTextBytes(seat, lcdName1, lcdName2)
 	}
@@ -195,14 +198,37 @@ func formatScore(prefix string, v int) int {
 // turned off in the same call, so the lamp table always tells the whole
 // truth.
 func (g *catcherGame) showPlayingLights() {
+	g.shownDash = g.sim.dashReady()
 	if g.seat == cartlib.SeatNone {
 		return
 	}
 	mask := cartlib.ButtonMask(0)
-	if g.sim.dashReady() {
+	if g.shownDash {
 		mask = cartlib.MaskJoyD
 	}
 	cartlib.SetButtonLights(g.seat, mask, true)
+}
+
+// refreshLights is refreshReadout's twin for the lamps: it runs every
+// playing frame and relights only when a dash has been spent or has come
+// back, twice per dash.
+func (g *catcherGame) refreshLights() {
+	if g.sim.dashReady() == g.shownDash {
+		return
+	}
+	g.showPlayingLights()
+}
+
+// blankIdleSeat clears the seat nobody is playing at once a one-player run
+// starts: the title's invitation left on it would read as a game still
+// waiting for a player. A keyboard run has no idle seat — pushLCD writes
+// both LCDs — so a seatless start leaves both alone.
+func blankIdleSeat(seat cartlib.Seat) {
+	if !seat.Single() {
+		return
+	}
+	cartlib.SetText(seat.Other(), "", "")
+	cartlib.SetButtonLights(seat.Other(), 0, true)
 }
 
 // showTitlePeripherals lights green (start) on BOTH seats: the title

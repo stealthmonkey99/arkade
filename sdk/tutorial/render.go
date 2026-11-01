@@ -22,7 +22,7 @@ var (
 	colSky    = ui.Color{R: 8, G: 12, B: 26, A: 255}
 	colGround = ui.Color{R: 34, G: 46, B: 38, A: 255}
 	colScore  = ui.Color{R: 255, G: 214, B: 92, A: 255}
-	colLives  = ui.Color{R: 232, G: 66, B: 74, A: 255}
+	colBanner = ui.Color{R: 232, G: 66, B: 74, A: 255}
 	colDim    = ui.Color{R: 150, G: 156, B: 170, A: 255}
 	colAccent = ui.Color{R: 57, G: 215, B: 160, A: 255}
 	colDash   = ui.Color{R: 92, G: 150, B: 255, A: 255}
@@ -87,17 +87,15 @@ func (g *catcherGame) drawPlaying(fb *cartlib.Framebuffer) {
 		}
 	}
 	playerWalk.cel().Draw(fb, g.sim.x, catcherY)
-	g.drawHUD(fb)
+	g.drawDashMeter(fb)
 }
 
 // drawWaveTitle flashes the wave's name across the panel as it starts.
 // That name is the level's own — the token a human typed on the `level`
 // line of assets/waves.arkadelevels, or into the level editor's rename box — so
 // the authored data reaches the player as words and not only as falling
-// fruit. It draws BEFORE the fruit, not after: a wave always opens with
-// something falling through this band, and a fruit that passes in front of
-// the lettering reads as a backdrop while one that the lettering punches
-// through reads as a glitch.
+// fruit. The sim holds the wave's first row back until the name clears,
+// so the lettering never shares the sky with a fruit.
 func (g *catcherGame) drawWaveTitle(fb *cartlib.Framebuffer) {
 	name := g.sim.waveTitle()
 	if name == "" {
@@ -108,29 +106,18 @@ func (g *catcherGame) drawWaveTitle(fb *cartlib.Framebuffer) {
 	small.DrawText(fb, (cartlib.FBWidth-w)/2, 14, name, 1, colAccent)
 }
 
-// drawHUD is the panel's own readout: score top left, lives top right.
-// It does not repeat the LCD, and the LCD does not repeat it — the same
-// numbers, but the panel is what a player watching the fruit can see
-// without looking down.
-func (g *catcherGame) drawHUD(fb *cartlib.Framebuffer) {
-	small := ui.Font3x5{}
-	// DrawUint draws a number straight from an integer, with no string
-	// built and thrown away on the way.
-	small.DrawUint(fb, 1, 1, uint32(g.sim.score), 1, colScore)
-
-	for i := 0; i < g.sim.lives; i++ {
-		ui.FillRect(fb, cartlib.FBWidth-3-i*4, 1, 2, 2, colLives)
-	}
-
-	// The dash meter: a short bar under the score that fills back up as
-	// the cooldown runs out, so "why is blue dark" has a visible answer.
+// drawDashMeter is the one readout left on the panel: a short bar that
+// fills back up as the cooldown runs out. Score and lives are on the LCD,
+// but this is a timing the player acts on with their eyes on the fruit,
+// and the lit blue button can only say "now", not "how soon".
+func (g *catcherGame) drawDashMeter(fb *cartlib.Framebuffer) {
 	if g.sim.dashReady() {
-		ui.FillRect(fb, 1, 7, 8, 1, colDash)
+		ui.FillRect(fb, 1, 1, 8, 1, colDash)
 		return
 	}
 	w := 8 - 8*g.sim.dashCool/dashCooldownSteps
 	if w > 0 {
-		ui.FillRect(fb, 1, 7, w, 1, colDim)
+		ui.FillRect(fb, 1, 1, w, 1, colDim)
 	}
 }
 
@@ -174,7 +161,7 @@ func (g *catcherGame) drawOverBanner(fb *cartlib.Framebuffer) {
 	ui.Rect{
 		X: 4, Y: 22, W: 56, H: 20,
 		Fill:    ui.Color{R: 10, G: 10, B: 14, A: 235},
-		Stroke:  colLives,
+		Stroke:  colBanner,
 		StrokeW: 1,
 	}.Draw(fb)
 

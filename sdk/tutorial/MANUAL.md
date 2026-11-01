@@ -32,9 +32,9 @@ answer, so play off it rather than counting seconds.
 
 A run starts with four waves that are the same every time: **FIRST
 DROPS**, **DOUBLES**, **THE ZIGZAG** and **DOWNPOUR**. Each one announces
-itself across the panel as it begins, and each one is built so that
-every single fruit in it can be reached on foot — if you miss one, it was
-gettable.
+itself across an empty sky before its first fruit falls, and each one is
+built so that every single fruit in it can be reached on foot — if you
+miss one, it was gettable.
 
 Take a whole wave and you get a **twenty-five point bonus** on top of the
 catches. Miss one fruit and the bonus is gone, so the waves are worth
@@ -56,12 +56,15 @@ letting fruit drop keeps the game slow, but also ends it.
 
 ## Your readout
 
-The panel carries the essentials: score at the top left, remaining lives
-as red pips at the top right, and a short bar under the score that fills
-back up as the dash recharges.
+The little screen at your seat carries your score, behind a basket, and
+your remaining lives as hearts. It changes only when you catch or drop
+something. When the run ends it shows the best score on the cabinet's
+board instead, and tells you if you have just beaten it. The screen at
+the other seat goes dark while you play.
 
-The little screen at your seat carries the same score and lives in
-words, so you can check them without taking your eyes off a fruit.
+The panel keeps one thing for itself: the short bar in the top left
+corner, which fills back up as the dash recharges, so you can time the
+next one without looking down.
 
 ## Scoring
 
@@ -79,4 +82,4 @@ is exactly what the prompt is protecting.
 
 ---
 
-*Manual for version 1.2.0*
+*Manual for version 1.4.0*

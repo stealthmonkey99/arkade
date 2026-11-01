@@ -34,13 +34,13 @@ for the ones you cannot walk to.
 
 ```panel
 tutorial/testdata/golden/catcher-title.txt
-tutorial/testdata/golden/catcher-playing.txt
 tutorial/testdata/golden/catcher-wave.txt
+tutorial/testdata/golden/catcher-playing.txt
 tutorial/testdata/golden/catcher-gameover.txt
-tutorial/testdata/golden/catcher-nameentry-confirm.txt
+tutorial/testdata/golden/catcher-nameentry.txt
 ```
 
-*The finished game, one screen at a time: title, a run, an authored wave, game over, initials.*
+*The finished game, one screen at a time: title, an authored wave announcing itself, the run, game over, initials.*
 
 That is the whole design, and it is deliberately that small — because
 what is *not* small is how much of the system it touches:
@@ -94,23 +94,18 @@ cd ../my-cartridges/catcher
 Then, exactly as [Getting started](getting-started.md#1-copy-the-template)
 describes, make it yours — four edits, in this order.
 
-**1. `go.mod`** — rename the module and point the two `replace` lines
-at the engine checkout, so the build uses the code you cloned (the
-tagged `v0.1.0` modules resolve without them too — see
-[Module resolution](../README.md#module-resolution)). Keep both lines
-even though only `cartlib` is imported directly, because `replace`
-directives are not transitive:
+**1. `go.mod`** — rename the module. The requires stay as the template
+has them, on the published SDK modules:
 
 ```go-mod file=go.mod
 module arkade-catcher-cartridge
 
 go 1.23
 
-require github.com/stealthmonkey99/arkade/sdk/cartlib v0.1.0
-require github.com/stealthmonkey99/arkade/sdk/ui v0.1.0
-
-replace github.com/stealthmonkey99/arkade/sdk/cartlib => ../../arkade/sdk/cartlib
-replace github.com/stealthmonkey99/arkade/sdk/ui => ../../arkade/sdk/ui
+require (
+	github.com/stealthmonkey99/arkade/sdk/cartlib v0.1.0
+	github.com/stealthmonkey99/arkade/sdk/ui v0.1.0
+)
 ```
 
 **2. `manifest.json`** — `slug` must be `catcher`, matching the directory
@@ -450,7 +445,7 @@ func joyDir(j uint8) ui.Direction {
 ```
 
 This file is short and almost all of it is a rule someone learned the
-hard way ([Input truths](patterns.md#input-truths)):
+hard way ([Input truths](patterns-hardware.md#input-truths)):
 
 - **React to `KindKeypress`** — `r.IsPress()`. The cabinet sends a
   keydown *and* a keypress for every physical press, so a `switch` that
@@ -464,7 +459,7 @@ hard way ([Input truths](patterns.md#input-truths)):
   `joyDir`, which counts a diagonal as its horizontal half.
 - **B is back/exit and nothing else, ever.** A second action button is
   always D. That is a platform-wide rule, not a per-game choice
-  ([Button semantics](patterns.md#button-semantics)).
+  ([Button semantics](patterns-hardware.md#button-semantics)).
 - **Quitting is already handled.** There is no `KeyJoyB` case: for a
   game that does not say otherwise, cartlib answers every quit press (q,
   escape, the red B button) with `cartlib.Exit` before `HandleInput` sees
@@ -744,7 +739,7 @@ func (s *sim) step(dir int, rand func() uint64) stepResult {
 // the same shape in every walk cel. Art with an irregular silhouette
 // wants pixel-perfect mask collision instead: Sheet.Cel has already
 // built a ui.Mask for every sprite it lifts, and ui.Mask.Overlaps
-// compares two of them directly. See the ui reference's "Sprites and
+// compares two of them directly. See the ui guide's "Sprites and
 // masks" and Authoring patterns' "Sprite art as PNGs".
 func overlaps(ax, ay, aw, ah, bx, by, bw, bh int) bool {
 	return ax < bx+bw && bx < ax+aw && ay < by+bh && by < ay+ah
@@ -837,8 +832,11 @@ func (g *catcherGame) Update(dtMicros uint64) {
 }
 ```
 
-and `render.go` learns to draw fruit and a HUD. The catcher is still a
-rectangle; [part 2](tutorial-assets.md) replaces it with a drawing.
+and `render.go` learns to draw fruit, plus a score and lives in the top
+corners for now: there is nowhere else to put them yet, and
+[step 3](#step-3--screens-scores-and-the-way-out) moves them off the
+panel. The catcher is still a rectangle; [part 2](tutorial-assets.md)
+replaces it with a drawing.
 
 ```go file=render.go step=2
 // SPDX-License-Identifier: GPL-2.0-or-later
@@ -892,7 +890,8 @@ func (g *catcherGame) drawPlaying(fb *cartlib.Framebuffer) {
 	g.drawHUD(fb)
 }
 
-// drawHUD is the panel's own readout: score top left, lives top right.
+// drawHUD is a stopgap: score top left, lives top right. Step 3 moves
+// both to the seat's LCD, which is where this platform keeps them.
 func (g *catcherGame) drawHUD(fb *cartlib.Framebuffer) {
 	small := ui.Font3x5{}
 	// DrawUint draws a number straight from an integer, with no string
@@ -995,14 +994,14 @@ The three files land together because they genuinely depend on each
 other: the screens need the peripherals, and the peripherals need to
 know which screen is up.
 
-One more dependency first — the screen machine, `sdk/fsm`. Add it to
-`go.mod` beside the other two, pointed at the same engine checkout:
+One more dependency first — the screen machine, `sdk/fsm`:
 
-```go-mod
-require github.com/stealthmonkey99/arkade/sdk/fsm v0.1.0
-
-replace github.com/stealthmonkey99/arkade/sdk/fsm => ../../arkade/sdk/fsm
+```sh
+go get github.com/stealthmonkey99/arkade/sdk/fsm@v0.1.0
 ```
+
+That adds its `require` to `go.mod` beside the other two, and its
+checksums to `go.sum`.
 
 ### The screen machine
 
@@ -1105,12 +1104,16 @@ type catcherGame struct {
 	// seat is the physical seat this run is locked to, or
 	// cartlib.SeatNone when the player is on a keyboard with no seat.
 	// It addresses the LCD and the button lights: the input record's
-	// Physical byte, never its Player byte (see the cartlib reference,
+	// Physical byte, never its Player byte (see the cartlib guide,
 	// "Input").
 	seat cartlib.Seat
 
 	stepAcc uint64 // dtMicros accumulated toward the next sim step
-	lcdAcc  uint64 // LCD refresh throttle
+
+	// What the playing LCD and lamps say now, so a frame rewrites them only
+	// on a change.
+	shownScore, shownLives int
+	shownDash              bool
 
 	// Scratch owned by the game, filled once per use. Building these in
 	// Render or Update would allocate every frame, which -gc=leaking
@@ -1185,6 +1188,7 @@ func (g *catcherGame) startPlay(seat cartlib.Seat) {
 	g.stepAcc = 0
 	g.seat = seat
 	cartlib.LockPlayerToSeat(seat)
+	blankIdleSeat(seat)
 	startMusic()
 	g.machine.Go(stPlaying)
 }
@@ -1218,7 +1222,6 @@ func (g *catcherGame) submitName() {
 
 func (g *catcherGame) Update(dtMicros uint64) {
 	g.held.Update(dtMicros)
-	g.lcdAcc += dtMicros
 
 	// Tick feeds the clock of the screen on TOP of the stack, and only
 	// that one. That is what freezes a covered screen for free: while the
@@ -1266,26 +1269,24 @@ func (g *catcherGame) updatePlaying(dtMicros uint64) {
 
 	// Fixed-step integration: accumulate the frame's delta and run whole
 	// 25ms steps. dtMicros is the per-tick delta, never a running total
-	// (see the cartlib reference, "The Game interface").
+	// (see the cartlib guide, "The Game interface").
 	g.stepAcc += dtMicros
 	for g.stepAcc >= stepMicros {
 		g.stepAcc -= stepMicros
 		res := g.sim.step(dir, cartlib.RandomU64)
 		if res.caught > 0 {
 			playCatch()
-			g.lcdAcc = lcdIntervalMicros // force the readout up now
 		}
 		if res.missed > 0 {
 			playMiss()
-			g.lcdAcc = lcdIntervalMicros
 		}
 		if g.sim.over() {
 			g.enterOver()
 			return
 		}
 	}
-	g.showPlayingLights()
-	g.tickLCD()
+	g.refreshLights()
+	g.refreshReadout()
 }
 
 // topScore reads rank 1 out of the cabinet's shared table for the title
@@ -1312,9 +1313,9 @@ The hook is for what is true *whenever this screen is on top*, not for
 how the player got here.
 
 The other thing worth noticing is what is *not* in the machine:
-`stepAcc`, the fixed-step accumulator, and `lcdAcc`, the LCD throttle.
-`Elapsed` is "time since this screen was entered"; a repeating or
-stepping accumulator is a different thing and stays a plain field.
+`stepAcc`, the fixed-step accumulator. `Elapsed` is "time since this
+screen was entered"; a repeating or stepping accumulator is a different
+thing and stays a plain field.
 
 #### When not to reach for it
 
@@ -1590,13 +1591,6 @@ func playOver() {
 func startMusic() { cartlib.PlaySound(sndTheme, cartlib.PlaySoundForever) }
 func stopMusic()  { cartlib.StopSound(sndTheme) }
 
-// lcdIntervalMicros throttles the readout to about 4 Hz. A 16x2
-// character LCD cannot legibly redraw at frame rate, and a readout
-// driven by the sim rather than by an event will blow past that without
-// anyone noticing. Events (a catch, a miss, a screen change) push
-// immediately instead of waiting for the next tick.
-const lcdIntervalMicros uint64 = 250_000
-
 // The basket. A 16x2 character LCD draws ASCII out of the chip's own mask
 // ROM and nothing else, so anything pictorial has to be uploaded as a 5x8
 // bitmap first. The engine ships a table of those for the runes games kept
@@ -1638,11 +1632,11 @@ func defineGlyphs(s *cartlib.Setup) {
 // LCD text, built once: formatting a fresh string or []byte every frame
 // would allocate under an allocator that never gives memory back.
 var (
-	lcdTitle1 = []byte("CATCHER ֍")
-	lcdTitle2 = []byte("GREEN TO PLAY")
-	lcdOver1  = []byte("GAME OVER")
-	lcdName1  = []byte("TOP 10!")
-	lcdName2  = []byte("YOUR INITIALS")
+	lcdTitle1  = []byte("CATCHER ֍")
+	lcdTitle2  = []byte("GREEN TO PLAY")
+	lcdNewBest = []byte("NEW BEST!")
+	lcdName1   = []byte("TOP 10!")
+	lcdName2   = []byte("YOUR INITIALS")
 
 	// The hearts come from the engine's built-in glyph table — no
 	// definition needed, they have been there for years. A rune in NEITHER
@@ -1662,15 +1656,19 @@ var (
 // The two prefixes lcdScore is built with. In play the basket names the
 // number without spending four of sixteen columns on the word — the panel
 // is already showing the basket, so the LCD reads as the same object's
-// tally. On the game-over screen the run is over and the word is the point,
-// so it says SCORE.
+// tally. At game over the panel's banner already says GAME OVER and shows
+// the score, so the LCD carries what the panel does not: the best score on
+// the cabinet's table, and whether this run just beat it.
 const (
 	scorePrefixPlaying = "֍ "
-	scorePrefixOver    = "SCORE "
+	scorePrefixBest    = "BEST "
 )
 
-func (g *catcherGame) tickLCD() {
-	if g.lcdAcc < lcdIntervalMicros {
+// refreshReadout runs every playing frame and writes the LCD only when the
+// numbers on it are out of date. Score and lives move on a catch or a miss,
+// a few times a run, so nearly every call returns at the guard.
+func (g *catcherGame) refreshReadout() {
+	if g.sim.score == g.shownScore && g.sim.lives == g.shownLives {
 		return
 	}
 	g.pushLCD()
@@ -1680,20 +1678,26 @@ func (g *catcherGame) tickLCD() {
 // transition calls it directly, so the display is never left showing the
 // previous screen's text.
 func (g *catcherGame) pushLCD() {
-	g.lcdAcc = 0
-	if g.seat == cartlib.SeatNone {
-		return // a keyboard player has no seat, and no LCD in front of them
-	}
 	seat := g.seat
+	if seat == cartlib.SeatNone {
+		// The browser's shared keyboard sits at no seat, and the page draws
+		// both LCDs: the score goes on both rather than on neither.
+		seat = cartlib.SeatBoth
+	}
 	switch g.machine.State() {
 	case stTitle:
 		cartlib.SetTextBytes(seat, lcdTitle1, lcdTitle2)
 	case stPlaying:
 		n := formatScore(scorePrefixPlaying, g.sim.score)
 		cartlib.SetTextBytes(seat, lcdScore[:n], lcdLives[clampLives(g.sim.lives)])
+		g.shownScore, g.shownLives = g.sim.score, g.sim.lives
 	case stOver:
-		n := formatScore(scorePrefixOver, g.sim.score)
-		cartlib.SetTextBytes(seat, lcdOver1, lcdScore[:n])
+		best, line2 := g.top.Score, []byte(nil)
+		if g.sim.score > best {
+			best, line2 = g.sim.score, lcdNewBest
+		}
+		n := formatScore(scorePrefixBest, best)
+		cartlib.SetTextBytes(seat, lcdScore[:n], line2)
 	case stName:
 		cartlib.SetTextBytes(seat, lcdName1, lcdName2)
 	}
@@ -1739,14 +1743,37 @@ func formatScore(prefix string, v int) int {
 // turned off in the same call, so the lamp table always tells the whole
 // truth.
 func (g *catcherGame) showPlayingLights() {
+	g.shownDash = g.sim.dashReady()
 	if g.seat == cartlib.SeatNone {
 		return
 	}
 	mask := cartlib.ButtonMask(0)
-	if g.sim.dashReady() {
+	if g.shownDash {
 		mask = cartlib.MaskJoyD
 	}
 	cartlib.SetButtonLights(g.seat, mask, true)
+}
+
+// refreshLights is refreshReadout's twin for the lamps: it runs every
+// playing frame and relights only when a dash has been spent or has come
+// back, twice per dash.
+func (g *catcherGame) refreshLights() {
+	if g.sim.dashReady() == g.shownDash {
+		return
+	}
+	g.showPlayingLights()
+}
+
+// blankIdleSeat clears the seat nobody is playing at once a one-player run
+// starts: the title's invitation left on it would read as a game still
+// waiting for a player. A keyboard run has no idle seat — pushLCD writes
+// both LCDs — so a seatless start leaves both alone.
+func blankIdleSeat(seat cartlib.Seat) {
+	if !seat.Single() {
+		return
+	}
+	cartlib.SetText(seat.Other(), "", "")
+	cartlib.SetButtonLights(seat.Other(), 0, true)
 }
 
 // showTitlePeripherals lights green (start) on BOTH seats: the title
@@ -1788,12 +1815,284 @@ func showConfirmPeripherals(seat cartlib.Seat) {
 }
 ```
 
+#### The score moves to the LCD
+
 The 16×2 character LCD in front of each seat is a free second screen,
-and the rule for it is that **the panel is the playfield and the LCD is
-the HUD**. It never duplicates a panel affordance; it says the things
-that are awkward to draw. It also cannot legibly redraw at frame rate —
-about 4 Hz is the budget — so the readout is throttled, and every screen
-transition pushes immediately so it is never left stale.
+and the platform's rule for it is that **the panel is the playfield and
+the LCD is the HUD** ([Designing for the hardware](patterns-hardware.md#designing-for-6464)).
+Step 2 drew the score and lives on the panel because there was nowhere
+else for them; now there is, so they move. On 64×64 pixels that matters:
+fruit enter along the top edge, exactly where the numbers sat, and every
+pixel a readout takes is one the game cannot use. The LCD also says
+things the panel cannot afford to — the basket's tally and a row of
+hearts, in words and glyphs, in front of the player who owns them.
+
+One readout stays on the panel: the dash meter. It is a timing the player
+acts on mid-catch, with their eyes on the fruit, and the lit blue button
+can only say "now", never "how soon". It moves up into the corner the
+score left, and `render.go` loses the rest of its HUD.
+
+It also gains the three new screens and the quit overlay, drawn plainly
+for now. The title's fruit and catcher are rectangles like the playfield's;
+[part 2](tutorial-assets.md) swaps both for art.
+
+```go file=render.go step=3
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+package main
+
+// Every screen, drawn through the shared sdk/ui toolkit onto the
+// cartridge's framebuffer.
+//
+// A *cartlib.Framebuffer IS a ui.Canvas, so every widget in sdk/ui
+// composites straight into the frame.
+
+import (
+	"github.com/stealthmonkey99/arkade/sdk/cartlib"
+	"github.com/stealthmonkey99/arkade/sdk/ui"
+)
+
+// The palette. LED panels bloom, so these are deliberately dimmer than a
+// monitor would suggest — review the result at 1x from across a table,
+// not zoomed in.
+var (
+	colSky    = ui.Color{R: 8, G: 12, B: 26, A: 255}
+	colGround = ui.Color{R: 34, G: 46, B: 38, A: 255}
+	colScore  = ui.Color{R: 255, G: 214, B: 92, A: 255}
+	colBanner = ui.Color{R: 232, G: 66, B: 74, A: 255}
+	colDim    = ui.Color{R: 150, G: 156, B: 170, A: 255}
+	colAccent = ui.Color{R: 57, G: 215, B: 160, A: 255}
+	colFruit  = ui.Color{R: 232, G: 66, B: 74, A: 255}
+	colDash   = ui.Color{R: 92, G: 150, B: 255, A: 255}
+)
+
+const groundY = catcherY + catcherH // 61: the line the catcher stands on
+
+// footer is built ONCE, at package level. Hints is caller-owned, exactly
+// like Menu.Items, and building a slice inside a render function would
+// allocate a new one every frame.
+//
+// Note what the hints draw: the buttons themselves, as coloured discs in
+// the cabinet's own button colours. Never a letter — the machine's
+// buttons are round, coloured and completely unlettered, so "PRESS A"
+// names a control the player cannot find.
+var footer = ui.HintRow{
+	Y:          56,
+	LabelColor: ui.Color{R: 170, G: 176, B: 190, A: 255},
+	Hints: []ui.Hint{
+		{Text: "PLAY", Color: ui.ButtonGreen},
+		{Text: "MOVE", Color: ui.White, Control: ui.HintStick},
+	},
+}
+
+func (g *catcherGame) Render(fb *cartlib.Framebuffer) {
+	// Render may run BEFORE the first Update — the engine's init render —
+	// so every branch here has to draw a valid frame from whatever Init
+	// alone set up.
+	//
+	// Under is the screen BENEATH the top of the stack, or the top itself
+	// when nothing is layered over it. Switching on it means the overlay
+	// composes for free: the frozen screen draws exactly as it always
+	// does, and the overlay goes on top of it.
+	switch g.machine.Under() {
+	case stTitle:
+		g.drawTitle(fb)
+	case stPlaying:
+		g.drawPlaying(fb)
+	case stOver:
+		g.drawPlaying(fb)
+		g.drawOverBanner(fb)
+	case stName:
+		g.drawNameEntry(fb)
+	}
+
+	// The overlay draws LAST, over the frozen screen underneath it.
+	if g.machine.State() == stConfirm {
+		g.confirm.Draw(fb)
+	}
+}
+
+func (g *catcherGame) drawPlaying(fb *cartlib.Framebuffer) {
+	fb.Clear(colSky.R, colSky.G, colSky.B)
+	ui.FillRect(fb, 0, groundY, cartlib.FBWidth, cartlib.FBHeight-groundY, colGround)
+
+	for i := range g.sim.fruit {
+		f := g.sim.fruit[i]
+		if f.live {
+			ui.FillRect(fb, f.x, f.y(), fruitW, fruitH, colFruit)
+		}
+	}
+	ui.FillRect(fb, g.sim.x, catcherY, catcherW, catcherH, colAccent)
+	g.drawDashMeter(fb)
+}
+
+// drawDashMeter is the one readout left on the panel: a short bar that
+// fills back up as the cooldown runs out. Score and lives are on the LCD,
+// but this is a timing the player acts on with their eyes on the fruit,
+// and the lit blue button can only say "now", not "how soon".
+func (g *catcherGame) drawDashMeter(fb *cartlib.Framebuffer) {
+	if g.sim.dashReady() {
+		ui.FillRect(fb, 1, 1, 8, 1, colDash)
+		return
+	}
+	w := 8 - 8*g.sim.dashCool/dashCooldownSteps
+	if w > 0 {
+		ui.FillRect(fb, 1, 1, w, 1, colDim)
+	}
+}
+
+func (g *catcherGame) drawTitle(fb *cartlib.Framebuffer) {
+	fb.Clear(colSky.R, colSky.G, colSky.B)
+	ui.FillRect(fb, 0, groundY, cartlib.FBWidth, cartlib.FBHeight-groundY, colGround)
+
+	led := ui.FontLED{}
+	w := led.TextWidth("CATCHER", 1)
+	led.DrawText(fb, (cartlib.FBWidth-w)/2, 6, "CATCHER", 1, colAccent)
+
+	// Three pieces of fruit sitting still above the catcher, so the
+	// title screen says what the game is without a word of explanation.
+	ui.FillRect(fb, 14, 22, fruitW, fruitH, colFruit)
+	ui.FillRect(fb, 30, 18, fruitW, fruitH, colFruit)
+	ui.FillRect(fb, 45, 24, fruitW, fruitH, colFruit)
+	ui.FillRect(fb, (cartlib.FBWidth-catcherW)/2, catcherY, catcherW, catcherH, colAccent)
+
+	// A one-row AttractPanel: the same widget the cabinet's screensaver
+	// uses for a full leaderboard, sized down to a single high-score
+	// line. Rows that would fall outside [Y, Y+H) are skipped whole.
+	// T is the accumulated dtMicros — never a wall clock — which is what
+	// lets a long name scroll without breaking golden reproducibility.
+	// Elapsed is the machine's per-screen clock: time since the title was
+	// entered, zeroed on the way in by the machine rather than by hand.
+	if g.top.Score > 0 {
+		ui.AttractPanel{
+			X: 6, Y: 34, W: 52, H: 12,
+			Top:    g.top,
+			Trophy: true,
+			Color:  colDim,
+			T:      g.machine.Elapsed(),
+		}.Draw(fb)
+	}
+
+	footer.X = (cartlib.FBWidth - footer.Width()) / 2
+	footer.Draw(fb)
+}
+
+func (g *catcherGame) drawOverBanner(fb *cartlib.Framebuffer) {
+	ui.Rect{
+		X: 4, Y: 22, W: 56, H: 20,
+		Fill:    ui.Color{R: 10, G: 10, B: 14, A: 235},
+		Stroke:  colBanner,
+		StrokeW: 1,
+	}.Draw(fb)
+
+	led := ui.FontLED{}
+	w := led.TextWidth("GAME OVER", 1)
+	led.DrawText(fb, (cartlib.FBWidth-w)/2, 26, "GAME OVER", 1, ui.White)
+
+	small := ui.Font3x5{}
+	sw := small.TextWidth(small.NumDigits(uint32(g.sim.score)), 1)
+	small.DrawUint(fb, (cartlib.FBWidth-sw)/2, 35, uint32(g.sim.score), 1, colScore)
+}
+
+func (g *catcherGame) drawNameEntry(fb *cartlib.Framebuffer) {
+	fb.Clear(colSky.R, colSky.G, colSky.B)
+
+	led := ui.FontLED{}
+	w := led.TextWidth("TOP 10!", 1)
+	led.DrawText(fb, (cartlib.FBWidth-w)/2, 8, "TOP 10!", 1, colScore)
+
+	small := ui.Font3x5{}
+	sw := small.TextWidth(small.NumDigits(uint32(g.sim.score)), 1)
+	small.DrawUint(fb, (cartlib.FBWidth-sw)/2, 18, uint32(g.sim.score), 1, colDim)
+
+	g.name.Draw(fb)
+}
+
+// playerWalk is the gameplay catcher's cycle. It lives with the drawing
+// rather than in catcherGame because that is what it is: the game only
+// ever has to say whether the catcher is moving.
+//
+// Part 2 replaces drawPlaying's rectangle with a three-cel animation strip
+// and this counter with the strip's own timing table. For now it counts,
+// so that the wiring is in place and only the art has to change.
+var playerWalk walker
+
+type walker struct {
+	acc  uint64
+	step int
+}
+
+func (w *walker) reset() { w.acc, w.step = 0, 0 }
+
+func (w *walker) advance(dtMicros uint64, moving bool) {
+	if !moving {
+		w.reset()
+		return
+	}
+	w.acc += dtMicros
+	for w.acc >= 130_000 {
+		w.acc -= 130_000
+		w.step = (w.step + 1) % 4
+	}
+}
+```
+
+A few things on the new screens earn their place:
+
+- **`ui.Font3x5.DrawUint`** draws a number straight from an integer,
+  with no string built and discarded on the way. Its sibling
+  `ui.FontLED` is the cabinet's own variable-width font — the one the
+  shell's menus use — and is what the titles are set in. Mind
+  `Font3x5`'s coverage: it silently draws nothing for characters it
+  lacks ([Fonts](ui.md#fonts)).
+- **[`ui.AttractPanel`](ui.md#score-panels)** is the shared
+  score block, and despite the name it is not attract-only: it draws
+  strictly inside its own rectangle and never clears, so a one-row
+  version is a perfectly good in-game high-score line. Its `T` field is
+  an animation clock and must be **accumulated `dtMicros`, never a wall
+  clock** — `Draw` is a pure function of the struct, which is exactly
+  what keeps golden frames reproducible.
+- **[`ui.HintRow`](ui.md#button-hints)** is built once at package level.
+  `Hints` is caller-owned, like `Menu.Items`; building a slice inside a
+  render function allocates a new one every frame, forever.
+
+The readout itself is two functions in `peripherals.go`. Every screen
+transition calls `pushLCD` directly, so the display is never left showing
+the previous screen's text. In play, `refreshReadout` runs every frame but
+writes only when the score or lives differ from what the LCD already
+says. They change a few times a run, on a catch or a miss, and a 16×2
+character LCD cannot legibly redraw at frame rate, so **never rewrite text
+that has not changed**. (A readout the simulation drives continuously, a
+countdown or a meter, has no events to hang on: throttle that one to about
+4 Hz instead.)
+
+The lamps follow the same rule. `refreshLights` is `refreshReadout`'s
+twin: blue changes twice per dash, when one is spent and when it comes
+back, so the lamp table is written then and not on every frame between.
+
+At game over the banner on the panel already says `GAME OVER` and shows
+the score, and an LCD that repeated it would be wasting the second
+screen. It shows what the panel does not: the best score on the
+cabinet's table, and `NEW BEST!` under it when this run just beat it.
+
+```lcd
+BEST 1240
+NEW BEST!
+```
+
+`pushLCD` also covers a player with no seat. The browser player's shared
+keyboard reports `SeatNone`, and with the score gone from the panel, a
+readout that went nowhere would leave that player blind, so it goes on
+both LCDs. The lamps still skip `SeatNone`: they light one seat's buttons,
+and a keyboard has none.
+
+The other half of seating is the seat nobody is at. The title invites
+both controllers, so both LCDs say `GREEN TO PLAY` and both green
+buttons are lit; once one player starts, `blankIdleSeat` clears the
+other seat's LCD and lamps. Stale menu text there would read as a game
+still waiting for a second player
+([LCD craft](patterns-hardware.md#lcd-craft)), and a lit green button that
+does nothing breaks the lighting rule below. The title puts both back.
 
 #### The basket is a glyph this game drew itself
 
@@ -1932,6 +2231,7 @@ package main
 // fake cabinet and drive the real Game through it: no TinyGo, no wasm.
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stealthmonkey99/arkade/sdk/cartlib"
@@ -1967,8 +2267,31 @@ func TestGreenStartsARunThatEndsOnGameOver(t *testing.T) {
 	if g.machine.State() != stOver {
 		t.Fatalf("an unsteered run never reached game over (state %d)", g.machine.State())
 	}
-	if line1, _, _ := h.LCD(cartlib.SeatP1); line1 != "GAME OVER" {
-		t.Errorf("game-over LCD line 1 = %q, want %q", line1, "GAME OVER")
+	// the panel's banner already shows GAME OVER and the score, so the LCD
+	// shows the table's best, which on an empty table is this run's
+	want := "BEST " + strconv.Itoa(g.sim.score)
+	if line1, _, _ := h.LCD(cartlib.SeatP1); line1 != want {
+		t.Errorf("game-over LCD line 1 = %q, want %q", line1, want)
+	}
+}
+
+// The title invites both seats; once one player starts, the other seat's
+// LCD and lamps go dark rather than keep inviting.
+func TestAOnePlayerRunBlanksTheIdleSeat(t *testing.T) {
+	h, _ := startCatcher(t)
+	if line1, _, _ := h.LCD(cartlib.SeatP2); line1 != "CATCHER ֍" {
+		t.Fatalf("seat 2's title LCD line 1 = %q, want %q", line1, "CATCHER ֍")
+	}
+
+	h.Input(hosttest.Press(cartlib.SeatP1, cartlib.KeyJoyA)...)
+	h.Tick(frameMicros)
+	if line1, line2, _ := h.LCD(cartlib.SeatP2); line1 != "" || line2 != "" {
+		t.Errorf("seat 2's LCD during seat 1's run = %q / %q, want blank", line1, line2)
+	}
+	for lamp, level := range h.Lamps[cartlib.SeatP2.Index()] {
+		if level != 0 {
+			t.Errorf("seat 2's lamp %d is at %d during seat 1's run, want dark", lamp, level)
+		}
 	}
 }
 
@@ -1999,12 +2322,30 @@ func TestBMidRunOpensTheConfirmAndAnotherPressResumes(t *testing.T) {
 		t.Errorf("a cancelled confirm still asked to exit %d time(s)", h.Exits)
 	}
 }
+
+// The browser's shared keyboard sits at no seat, and the score is on the LCD
+// rather than the panel, so a keyboard run must still put it somewhere.
+func TestAKeyboardRunShowsItsScoreOnBothLCDs(t *testing.T) {
+	h, g := startCatcher(t)
+	h.Input(hosttest.KeyboardPress(cartlib.KeyEnter))
+	if g.machine.State() != stPlaying {
+		t.Fatalf("Enter at the title left state %d, want stPlaying", g.machine.State())
+	}
+	for _, seat := range []cartlib.Seat{cartlib.SeatP1, cartlib.SeatP2} {
+		if line1, _, _ := h.LCD(seat); line1 != "֍ 0" {
+			t.Errorf("seat %d LCD line 1 = %q, want the score %q", seat.Index(), line1, "֍ 0")
+		}
+	}
+}
 ```
 
-The second test is the modal stack from [the way out](#the-way-out),
+The third test is the modal stack from [the way out](#the-way-out),
 asserted: the overlay is pushed over the run, and popping it re-enters
-the playing screen, whose `enterScreen` arm puts its LCD line back.
-`go test ./...` runs both beside the rules, still without TinyGo or a
+the playing screen, whose `enterScreen` arm puts its LCD line back. The
+second and fourth are the two seat cases from [the hardware](#the-hardware):
+the seat nobody is at goes dark, and a run started from the seatless
+keyboard puts its score on both LCDs.
+`go test ./...` runs all four beside the rules, still without TinyGo or a
 `.wasm`. The fake answers as a bare `.wasm` would, so a sheet or a
 sound the bundle would carry is simply absent — exactly the case
 `sprites.go` and `loadSounds` already handle.

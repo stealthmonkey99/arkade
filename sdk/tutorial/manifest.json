@@ -5,7 +5,7 @@
   "title": "Catcher",
   "publisher": "arkade",
   "author": "Årkade",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Catch the falling fruit before it hits the ground",
   "tags": ["action"],
   "players": ["1p"],

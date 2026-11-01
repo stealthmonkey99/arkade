@@ -63,7 +63,9 @@ const (
 
 	// waveNameSteps holds the wave's name across the panel for the first
 	// second and a half of it. It is the only place the name a human
-	// typed in the level editor reaches the player.
+	// typed in the level editor reaches the player. The wave's first row
+	// waits for the name to clear, and the previous wave has already
+	// resolved its last fruit, so the name always has an empty sky.
 	waveNameSteps = 60
 
 	// cellFruit is the pack's "a fruit falls here" character. Every
@@ -165,9 +167,9 @@ func (s *sim) waveTitle() string {
 
 // waveSpawn fires the wave's next grid row when its clock reaches it. A
 // row is a MOMENT, not a place: every cellFruit on it drops at the same
-// step, each down its own lane.
+// step, each down its own lane. Row 0 fires as the wave's name clears.
 func (s *sim) waveSpawn(lv *levels.Level) {
-	if s.waveRow < lv.H && s.waveStep >= s.waveRow*waveMeta(lv, "cadence", 1) {
+	if s.waveRow < lv.H && s.waveStep >= waveNameSteps+s.waveRow*waveMeta(lv, "cadence", 1) {
 		row := lv.Row(s.waveRow)
 		for i := 0; i < len(row); i++ {
 			if row[i] == cellFruit {
@@ -345,7 +347,7 @@ func (s *sim) step(dir int, rand func() uint64) stepResult {
 // the same shape in every walk cel. Art with an irregular silhouette
 // wants pixel-perfect mask collision instead: Sheet.Cel has already
 // built a ui.Mask for every sprite it lifts, and ui.Mask.Overlaps
-// compares two of them directly. See the ui reference's "Sprites and
+// compares two of them directly. See the ui guide's "Sprites and
 // masks" and Authoring patterns' "Sprite art as PNGs".
 func overlaps(ax, ay, aw, ah, bx, by, bw, bh int) bool {
 	return ax < bx+bw && bx < ax+aw && ay < by+bh && by < ay+ah

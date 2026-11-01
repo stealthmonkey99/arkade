@@ -6,10 +6,9 @@ button-light chase, and a counter that survives a cartridge reload via
 it's short and heavily commented as a tour of
 [`cartlib`](../cartlib)'s [`Game`](../cartlib/game.go) interface.
 
-See [`../docs/getting-started.md`](../docs/getting-started.md) (the
-SDK's authoring walkthrough) for prerequisites, testing, and `.rcart`
-packaging, and [`../docs/`](../docs/README.md) for the full reference
-set.
+See the [Quick Start Guide](../docs/getting-started.md) for
+prerequisites, testing, and `.rcart` packaging, and
+[`../docs/`](../docs/README.md) for the full reference set.
 
 ## Use this as a starting point
 
@@ -31,11 +30,11 @@ rm template.wasm                              # the template's own build
 
 Then edit, in order:
 
-1. `go.mod` — rename the module, then either require the tagged SDK
-   modules or point both `replace` lines at the engine checkout
-   (`../../arkade/sdk/cartlib` and `../../arkade/sdk/ui` from the layout
-   above). [Module resolution](../README.md#module-resolution) has both
-   forms.
+1. `go.mod` — rename the module. It requires the published SDK modules,
+   so the copy builds anywhere; inside the engine checkout,
+   `sdk/go.work` points the same requires at the local SDK instead.
+   [Module resolution](../README.md#module-resolution) covers building a
+   copy against a local checkout.
 2. `manifest.json` — your own `slug`/`title`/`version`. The Makefile
    reads `slug` from here to name its outputs (`<slug>.wasm`,
    `<slug>.rcart`), so it needs no edits of its own beyond the next step.

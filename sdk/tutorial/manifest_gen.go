@@ -4,6 +4,6 @@
 
 package main
 
-const manifestJSON = `{"abi":1,"slug":"catcher","name":"Catcher","description":"Catch the falling fruit before it hits the ground","version":"1.2.0","players":[1],"icon":"assets/icon.png"}`
+const manifestJSON = `{"abi":1,"slug":"catcher","name":"Catcher","description":"Catch the falling fruit before it hits the ground","version":"1.4.0","players":[1],"icon":"assets/icon.png"}`
 
 var manifestBytes = []byte(manifestJSON)

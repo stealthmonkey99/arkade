@@ -1,14 +1,16 @@
-# cartlib reference
+# cartlib guide
+
+This is the guided tour of `cartlib` — how the pieces fit and where they
+trip you — while its [API reference](api/cartlib.md) (and
+[hosttest's](api/cartlib-hosttest.md)) lists every exported name with its
+exact contract, generated from the doc comments `go doc` and pkg.go.dev
+show.
 
 `cartlib` (`github.com/stealthmonkey99/arkade/sdk/cartlib`, at
 `sdk/cartlib`) is the cartridge SDK library: an ergonomic Go wrapper
 around the raw wasm [ABI](abi.md). You implement one interface;
 `cartlib` supplies every `cart_*` export and wraps every `host_*`
-import. This page is the author-facing tour of that surface: how the pieces
-fit and where they trip you. The symbol-by-symbol reference is generated
-from the doc comments into [api/cartlib.md](api/cartlib.md) (and
-[api/cartlib-hosttest.md](api/cartlib-hosttest.md)); `go doc` and
-pkg.go.dev show the same comments.
+import.
 
 Everything here compiles under **both** TinyGo (the real cartridge
 build) and the ordinary host Go toolchain (your unit tests): the
@@ -69,7 +71,7 @@ the cabinet's idle screensaver. Opting in to attract takes the
 implementation **plus** a one-line export shim (below). Use
 `fb.ClearTransparent()` to overlay the engine's starfield. House rule:
 attract plays **zero sounds** and touches no LCDs/lights; see
-[Authoring patterns](patterns.md#attract-mode).
+[Authoring patterns](patterns-loading-attract.md#attract-mode).
 
 The attract export shim, verbatim:
 
@@ -171,7 +173,7 @@ func draw(fb *cartlib.Framebuffer) {
 A [`*cartlib.Framebuffer`](api/cartlib.md#type-framebuffer) **is** a `ui.Canvas`, so the entire shared
 widget toolkit composites straight into it — labels, menus, borders,
 fonts, sprites. That is the recommended way to draw anything beyond
-raw pixels; see the [ui reference](ui.md). `cartlib.Color` is an alias
+raw pixels; see the [ui guide](ui.md). `cartlib.Color` is an alias
 of `ui.Color`, so simple cartridges don't need the second import.
 
 cartlib also carries its own tiny 3×5 pixel font for the smallest
@@ -185,7 +187,7 @@ host-side draw imports (`host_draw_pixel`, `host_fill_rect`,
 `host_draw_sprite`, `host_draw_cel`) are not wrapped by cartlib: it sends
 the whole framebuffer after every `Render`, which would overwrite them.
 Sprite art is a guest-side `ui.Sprite`, compiled in or lifted from the
-bundle ([patterns](patterns.md#sprite-art-as-pngs)).
+bundle ([patterns](patterns-art-sound.md#sprite-art-as-pngs)).
 
 ## Input
 
@@ -313,7 +315,7 @@ a not-yet-resolved (or missing) sound is a safe no-op. A bare `.wasm`
 with no bundle plays nothing and warns once per missing sound — dev
 builds stay quiet, never crash. Concurrent sounds mix; keep peaks
 around 0.9 full scale, and synthesize for small mid-range speakers
-([patterns](patterns.md#sound-design)).
+([patterns](patterns-art-sound.md#sound-design)).
 
 ## Storage
 
@@ -439,7 +441,7 @@ func backToTitle() { cartlib.UnlockPlayerStrategy() }
 - Pick the [StrategyKind](api/cartlib.md#type-strategykind) that matches
   the game: solo rotates, against-AI gates without rotating, turn-based
   pairs with [SwitchPlayer](api/cartlib.md#func-switchplayer). The turn-based patterns have sharp edges — read
-  [patterns](patterns.md#seats-strategy-and-rotation) before building
+  [Seating & rotation](seating.md) before building
   any 2P turn-based game.
 - `UnlockPlayerStrategy()` on every path back to a menu;
   `PopPlayerStrategy()` for scene-level pushes (the engine cleans up
@@ -516,7 +518,7 @@ func hud(seat cartlib.Seat, score uint32) {
   a `[2]T` array.
 - UX rule: **light a button exactly when pressing it would do
   something** — an always-lit button reads as a mystery
-  ([patterns](patterns.md#buttons-and-lights)).
+  ([patterns](patterns-hardware.md#buttons-and-lights)).
 - The LCD is the HUD; the panel is the playfield. Blank the idle
   seat's LCD in 1P, and re-assert LCD/light state when resuming from
   any pause/confirm overlay — nothing is restored for you.
@@ -601,7 +603,7 @@ whole table, bundle caps included, is in the
 
 ## Testing
 
-[Getting started](getting-started.md#5-test-as-you-go) walks the three
+The [Quick Start Guide](getting-started.md#5-test-as-you-go) walks the three
 layers: plain `go test` against the in-process fake in
 `sdk/cartlib/hosttest` (`h := hosttest.New(t)`, `h.Init(game)`,
 `h.Input`, `h.Tick`, then read what the fake cabinet saw), the

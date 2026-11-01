@@ -147,6 +147,10 @@ with the conventions above, so a page renders the way
 - **`figure <name>`** inlines `sdk/docs/figures/<name>.svg` with
   the body as its caption; **`demo <name>`** mounts one of the
   site's interactive demos. Both are first-party only.
+- **Sidebar.** The site's build holds the nav tree: each page's short
+  label, its group, and at most one level of child pages. A new page
+  fails the build until it is slotted in there. A page marked
+  `sections: false` lists none of its own headings under its entry.
 - **Glossary terms.** `glossary.md`'s `##` headings are the term table.
   The site links the first mention of each spelling of a term on every
   other page to a popup carrying that entry's definition, so a new entry

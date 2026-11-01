@@ -36,8 +36,9 @@ The format ships no opinion about what a grid MEANS. A box-pushing
 puzzle's level is a room; a nonogram is a clue grid. Catcher has no board at all, so its
 grid has to encode the one thing it does have — a schedule:
 
-- **A row is a moment.** Time runs down the page. Row 0 fires the instant
-  the wave starts, row 1 one `cadence` later, and so on to the bottom.
+- **A row is a moment.** Time runs down the page. Row 0 fires as the
+  wave's name clears the panel, row 1 one `cadence` later, and so on to
+  the bottom.
 - **A column is a drop lane**, spread evenly across the 64-pixel panel:
   lane 0 at the left edge, the last lane at the right. Twelve lanes is a
   comfortable number to draw and lands them about five pixels apart.
@@ -126,16 +127,16 @@ anyway.
 ```levels file=assets/waves.arkadelevels
 // Catcher's authored waves — the opening minute of a run, drawn by hand
 // instead of drawn from the RNG. Edit them here or in levellab at
-// arkade.build/dev/tools (connect the cartridge folder and open this file); `make build`
-// compiles it into the Go the cartridge builds in.
+// arkade.build/dev/tools (connect the cartridge folder and open this
+// file); `make build` compiles it into the Go the cartridge builds in.
 //
 // # How to read a grid
 //
-// A row is a MOMENT, not a place. Time runs down the page: row 0 fires the
-// instant the wave starts, row 1 one `cadence` later, and so on. A column is
-// a drop lane spread evenly across the 64-pixel panel — lane 0 at the left
-// edge, lane 11 at the right — so an `o` says "a fruit falls here, now", and
-// two `o`s on one row fall together.
+// A row is a MOMENT, not a place. Time runs down the page: row 0 fires as
+// the wave's name clears the panel, row 1 one `cadence` later, and so on.
+// A column is a drop lane spread evenly across the 64-pixel panel — lane 0
+// at the left edge, lane 11 at the right — so an `o` says "a fruit falls
+// here, now", and two `o`s on one row fall together.
 //
 // `cadence` is sim steps between rows (one step is 25 ms) and `fall` is the
 // fall speed in sixteenths of a pixel per step, so a wave gets harder by
@@ -378,8 +379,14 @@ const (
 	walkStep = 2
 	fallMax  = 40
 
+	// waveNameSteps is the empty sky before row 0 fires, while the wave's
+	// name holds the panel.
+	waveNameSteps = 60
+
 	// startX is where reset() parks the catcher, and therefore where the
-	// solver's player begins the wave.
+	// solver's player begins the wave. Later waves start wherever the last
+	// one left the basket, but waveNameSteps of walking crosses the whole
+	// panel, so the start column cannot change what is reachable.
 	startX = (fbW - catcherW) / 2
 )
 
@@ -417,7 +424,7 @@ func schedule(lv *levels.Level, cadence int) []drop {
 		row := lv.Row(y)
 		for x := 0; x < len(row); x++ {
 			if row[x] == cellFruit {
-				out = append(out, drop{row: y, lane: x, x: laneX(x, lv.W), spawn: y * cadence})
+				out = append(out, drop{row: y, lane: x, x: laneX(x, lv.W), spawn: waveNameSteps + y*cadence})
 			}
 		}
 	}
@@ -625,8 +632,9 @@ hands the cartridge to it. The generator solves every wave first and writes
 nothing if one of them is unplayable, so a broken wave fails the build
 rather than a cabinet.
 
-...and require `sdk/levels` in `go.mod`; its `replace` is already there
-from part 2. One require covers both halves of the pipeline — the
+...and require `sdk/levels` in `go.mod`
+(`go get github.com/stealthmonkey99/arkade/sdk/levels@v0.1.0`). One
+require covers both halves of the pipeline — the
 cartridge compiles the runtime half, the generator runs the host-side
 `packfile` subpackage of the same module:
 
@@ -761,7 +769,9 @@ const (
 
 	// waveNameSteps holds the wave's name across the panel for the first
 	// second and a half of it. It is the only place the name a human
-	// typed in the level editor reaches the player.
+	// typed in the level editor reaches the player. The wave's first row
+	// waits for the name to clear, and the previous wave has already
+	// resolved its last fruit, so the name always has an empty sky.
 	waveNameSteps = 60
 
 	// cellFruit is the pack's "a fruit falls here" character. Every
@@ -863,9 +873,9 @@ func (s *sim) waveTitle() string {
 
 // waveSpawn fires the wave's next grid row when its clock reaches it. A
 // row is a MOMENT, not a place: every cellFruit on it drops at the same
-// step, each down its own lane.
+// step, each down its own lane. Row 0 fires as the wave's name clears.
 func (s *sim) waveSpawn(lv *levels.Level) {
-	if s.waveRow < lv.H && s.waveStep >= s.waveRow*waveMeta(lv, "cadence", 1) {
+	if s.waveRow < lv.H && s.waveStep >= waveNameSteps+s.waveRow*waveMeta(lv, "cadence", 1) {
 		row := lv.Row(s.waveRow)
 		for i := 0; i < len(row); i++ {
 			if row[i] == cellFruit {
@@ -1043,7 +1053,7 @@ func (s *sim) step(dir int, rand func() uint64) stepResult {
 // the same shape in every walk cel. Art with an irregular silhouette
 // wants pixel-perfect mask collision instead: Sheet.Cel has already
 // built a ui.Mask for every sprite it lifts, and ui.Mask.Overlaps
-// compares two of them directly. See the ui reference's "Sprites and
+// compares two of them directly. See the ui guide's "Sprites and
 // masks" and Authoring patterns' "Sprite art as PNGs".
 func overlaps(ax, ay, aw, ah, bx, by, bw, bh int) bool {
 	return ax < bx+bw && bx < ax+aw && ay < by+bh && by < ay+ah
@@ -1057,7 +1067,17 @@ testable as the rest of the file. `catcher_test.go` reads the real shipped
 pack — `wavesPack.Levels[0]`, not a fixture standing in for it — and still
 runs in a millisecond without TinyGo, wasm or a fake host.
 
-Two smaller decisions in there are worth naming:
+Three smaller decisions in there are worth naming:
+
+- **Row 0 waits for the name.** A wave opens with its name across the
+  panel for a second and a half (`waveNameSteps`), and `waveSpawn` holds
+  the first row back until it clears. The wave before has already
+  resolved its last fruit, so the lettering always has an empty sky: a
+  fruit falling through a word reads as a glitch whichever one is drawn
+  on top. The generator's copy of the schedule starts its drops at the
+  same offset, which also makes its "the catcher starts in the middle"
+  assumption harmless — a second and a half of walking crosses the whole
+  panel.
 
 - **`waveMeta` has a floor.** `levels_gen.go` is generated, and the
   generator has already refused a missing `cadence` — but it is also
@@ -1068,8 +1088,8 @@ Two smaller decisions in there are worth naming:
   *walking* player can reach. A dash can beat it, and a game that punished
   you for playing well would be a strange thing to ship.
 
-`render.go` gains eight lines: the wave's name, held across the panel for
-its first second and a half.
+`render.go` gains one small function: the wave's name, held across an
+empty sky for the wave's first second and a half.
 
 ```go file=render.go step=6
 // SPDX-License-Identifier: GPL-2.0-or-later
@@ -1096,7 +1116,7 @@ var (
 	colSky    = ui.Color{R: 8, G: 12, B: 26, A: 255}
 	colGround = ui.Color{R: 34, G: 46, B: 38, A: 255}
 	colScore  = ui.Color{R: 255, G: 214, B: 92, A: 255}
-	colLives  = ui.Color{R: 232, G: 66, B: 74, A: 255}
+	colBanner = ui.Color{R: 232, G: 66, B: 74, A: 255}
 	colDim    = ui.Color{R: 150, G: 156, B: 170, A: 255}
 	colAccent = ui.Color{R: 57, G: 215, B: 160, A: 255}
 	colDash   = ui.Color{R: 92, G: 150, B: 255, A: 255}
@@ -1161,17 +1181,15 @@ func (g *catcherGame) drawPlaying(fb *cartlib.Framebuffer) {
 		}
 	}
 	playerWalk.cel().Draw(fb, g.sim.x, catcherY)
-	g.drawHUD(fb)
+	g.drawDashMeter(fb)
 }
 
 // drawWaveTitle flashes the wave's name across the panel as it starts.
 // That name is the level's own — the token a human typed on the `level`
 // line of assets/waves.arkadelevels, or into the level editor's rename box — so
 // the authored data reaches the player as words and not only as falling
-// fruit. It draws BEFORE the fruit, not after: a wave always opens with
-// something falling through this band, and a fruit that passes in front of
-// the lettering reads as a backdrop while one that the lettering punches
-// through reads as a glitch.
+// fruit. The sim holds the wave's first row back until the name clears,
+// so the lettering never shares the sky with a fruit.
 func (g *catcherGame) drawWaveTitle(fb *cartlib.Framebuffer) {
 	name := g.sim.waveTitle()
 	if name == "" {
@@ -1182,29 +1200,18 @@ func (g *catcherGame) drawWaveTitle(fb *cartlib.Framebuffer) {
 	small.DrawText(fb, (cartlib.FBWidth-w)/2, 14, name, 1, colAccent)
 }
 
-// drawHUD is the panel's own readout: score top left, lives top right.
-// It does not repeat the LCD, and the LCD does not repeat it — the same
-// numbers, but the panel is what a player watching the fruit can see
-// without looking down.
-func (g *catcherGame) drawHUD(fb *cartlib.Framebuffer) {
-	small := ui.Font3x5{}
-	// DrawUint draws a number straight from an integer, with no string
-	// built and thrown away on the way.
-	small.DrawUint(fb, 1, 1, uint32(g.sim.score), 1, colScore)
-
-	for i := 0; i < g.sim.lives; i++ {
-		ui.FillRect(fb, cartlib.FBWidth-3-i*4, 1, 2, 2, colLives)
-	}
-
-	// The dash meter: a short bar under the score that fills back up as
-	// the cooldown runs out, so "why is blue dark" has a visible answer.
+// drawDashMeter is the one readout left on the panel: a short bar that
+// fills back up as the cooldown runs out. Score and lives are on the LCD,
+// but this is a timing the player acts on with their eyes on the fruit,
+// and the lit blue button can only say "now", not "how soon".
+func (g *catcherGame) drawDashMeter(fb *cartlib.Framebuffer) {
 	if g.sim.dashReady() {
-		ui.FillRect(fb, 1, 7, 8, 1, colDash)
+		ui.FillRect(fb, 1, 1, 8, 1, colDash)
 		return
 	}
 	w := 8 - 8*g.sim.dashCool/dashCooldownSteps
 	if w > 0 {
-		ui.FillRect(fb, 1, 7, w, 1, colDim)
+		ui.FillRect(fb, 1, 1, w, 1, colDim)
 	}
 }
 
@@ -1248,7 +1255,7 @@ func (g *catcherGame) drawOverBanner(fb *cartlib.Framebuffer) {
 	ui.Rect{
 		X: 4, Y: 22, W: 56, H: 20,
 		Fill:    ui.Color{R: 10, G: 10, B: 14, A: 235},
-		Stroke:  colLives,
+		Stroke:  colBanner,
 		StrokeW: 1,
 	}.Draw(fb)
 
@@ -1321,10 +1328,7 @@ func (w *walker) cel() *ui.Sprite { return walkCels[w.step] }
 
 That name is the level's own — the token you typed on the `level` line, or
 into levellab's rename box — and it is the only place authored data reaches
-the player as *words*. It draws before the fruit rather than after, which
-is not a detail: a wave always opens with something falling through that
-band, and a fruit passing in front of the lettering reads as a backdrop
-while one the lettering punches through reads as a glitch.
+the player as *words*.
 
 Last, `main.go`, whose header now names `levels_gen.go`. Waves are a
 player-visible feature, which is a **minor** version bump — in your copy,
@@ -1422,9 +1426,9 @@ things:
 - **The opening reads as designed**, because it is. The same first fruit,
   in the same lane, every single run — a wave draws no random numbers at
   all, so its determinism is structural rather than seeded.
-- **The bonus fires** on a clean wave: the score jumps twenty-five past
-  where the catches put it, which is the generator's `par` reaching the
-  scoreboard.
+- **The bonus fires** on a clean wave: the score on the LCD jumps
+  twenty-five past where the catches put it, which is the generator's
+  `par` reaching the scoreboard.
 - **The handover is invisible.** When `DOWNPOUR` empties, fruit simply
   keep coming — from `cartlib.RandomU64` now, at the difficulty your catch
   count has already earned. The high-score table and the attract screen

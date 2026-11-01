@@ -1,4 +1,4 @@
-# How game engines work (and how Årkade does it)
+# Game Engine Primer
 
 A game engine is a small number of ideas repeated since the 1970s: a
 loop that runs the world forward, a buffer of pixels, some pictures you
@@ -12,7 +12,7 @@ not need any gamedev background to read it. When you're done you'll know
 both how engines do this in general and exactly which file to open here.
 
 If you'd rather start by building something, go to
-[Getting started](getting-started.md) and come back — nothing below is a
+the [Quick Start Guide](getting-started.md) and come back — nothing below is a
 prerequisite for the template. This is the tour, not the manual.
 
 ## 1. The game loop
@@ -55,22 +55,26 @@ Almost every serious engine ends up at the second one, and the reason is
 rarely physics. It's that a deterministic simulation can be **written
 down and played back**.
 
-The difference is invisible until frames get expensive, which is exactly
-when it matters. Drag the lever:
+The difference is invisible while every frame is on time. It shows up
+when one frame suddenly takes several times longer than the rest — a
+*hitch*. The demo below throws the same ball three ways: the two schools
+above, plus the naive **frame-based** loop most first games start with.
+Slide the hitches up:
 
 ```demo lag
-One throw, simulated both ways — the lever starts at half travel, so you
-are looking at the problem already. The **frame-based** throw advances a
-fixed 16 ms of simulation per tick whatever the clock said, so it traces a
-perfect parabola *in slow motion*: at the top of the lever it is still
-climbing when the real throw has long since landed. The **delta-based**
-throw scales by elapsed time and lands exactly where and when it should,
-on the line, at any tick rate — what lag costs it is *resolution*, and you
-can watch its per-tick dots thin out until the ball is jumping a
-noticeable distance each step. That gap is the whole reason a large `dt`
-gets clamped rather than trusted: a step big enough is a step straight
-through a wall. Slide lag to zero and the two become the same ball. The
-dashed line is the true arc; the hollow marker is real time.
+The same throw at a thin wall, three ways, fed the same frame times (the
+strip at the bottom; a tall bar is a hitch). **1 Frame-based** steps
+33 ms per frame however long the frame took, so every hitch is time it
+never gets back: it drifts behind the hollow ring, which marks where the
+ball really is. **2 Variable Δt** steps by the frame's real length, so it
+keeps up, but a hitch becomes one long step: its dots spread apart and,
+when that step lands past the wall, the collision check never sees the
+hit and the ball goes straight through. **3 Fixed step + accumulator**
+runs as many 33 ms steps as the frame owes: it freezes for the hitch,
+then catches up and lands on the same dots every throw. The dashed line
+is the true path; faint dots are the previous throw. The hitches come
+from a seeded random generator, so **replay** re-runs the identical
+session.
 ```
 
 **In Årkade.** The host owns the outer loop; you implement five methods
@@ -134,7 +138,7 @@ absolute comparison and is engine time, not wall time. This is not
 pedantry; [determinism](#6-randomness-and-determinism) is what it buys
 you.
 
-More: [cartlib reference](cartlib.md#the-game-interface),
+More: [cartlib guide](cartlib.md#the-game-interface),
 [ABI reference](abi.md#cartridge-exports).
 
 ## 2. Frames and the display
@@ -191,7 +195,7 @@ Compositing is there when you want it: `ui.Layer` is an off-screen
 Canvas, `ui.Compositor` flattens a fixed stack of layers in add order with
 per-layer opacity, and `ui.Fade` animates one number from a `dt`. A layer you
 allocate in `Init` and *never clear* is how you get trails and smears
-([ui reference](ui.md#layers-and-compositing)).
+([ui guide](ui.md#layers-and-compositing)).
 
 Two panel-specific truths that no amount of general knowledge will tell
 you:
@@ -202,7 +206,7 @@ you:
 - **64×64 is a window, not a canvas to shrink onto.** LED panels bloom;
   near-white fields glare across the table. Move a camera instead of
   scaling the world down, and review at 1× from across the room
-  ([patterns](patterns.md#designing-for-6464)).
+  ([patterns](patterns-hardware.md#designing-for-6464)).
 
 ## 3. Sprites
 
@@ -278,8 +282,8 @@ legal 128×16 PNG.)
 with the guest-side runtime in `sdk/levels`. Source of truth is the text
 file; every cartridge build regenerates the Go, and you commit both halves.
 
-More: [ui reference](ui.md#sprites-and-masks),
-[patterns](patterns.md#sprite-art-as-pngs).
+More: [ui guide](ui.md#sprites-and-masks),
+[patterns](patterns-art-sound.md#sprite-art-as-pngs).
 
 ## 4. Input
 
@@ -372,7 +376,7 @@ a 2P game still demuxes on `Player` regardless. This is the easiest
 thing in the SDK to get subtly wrong, so it has its own page:
 [Seating & rotation](seating.md#which-shape-is-your-game).
 
-More: [cartlib reference](cartlib.md#input),
+More: [cartlib guide](cartlib.md#input),
 [ABI reference](abi.md#input-records).
 
 ## 5. State and scenes
@@ -504,8 +508,8 @@ What it buys, in increasing order of payoff:
   scripted input and fixed timing, asserts ASCII snapshots of the
   frames, and checks that two runs are byte-identical. The minimum bar
   is determinism plus one correctness anchor
-  ([patterns](patterns.md#testing-strategy),
-  [Getting started](getting-started.md#5-test-as-you-go)).
+  ([patterns](patterns-testing.md#testing-strategy),
+  [Quick Start Guide](getting-started.md#5-test-as-you-go)).
 - **Cross-host agreement.** The *same* `.wasm` under the *same* script on
   both hosts, asserted byte-for-byte — the browser host checks itself
   against the same golden files the Go tests write. A divergence is a
@@ -602,21 +606,21 @@ The practical shape of that discipline:
   audio fully live, so silence has to be structural: fire your title
   sting from `LoadFrame`, a path attract never runs.
 
-More: [cartlib reference](cartlib.md#sound),
-[patterns](patterns.md#sound-design),
-[patterns](patterns.md#attract-mode).
+More: [cartlib guide](cartlib.md#sound),
+[patterns](patterns-art-sound.md#sound-design),
+[patterns](patterns-loading-attract.md#attract-mode).
 
 ## 8. Where to go next
 
 You now have the map. The territory:
 
-- **[Getting started](getting-started.md)** — copy the template, build
+- **[Quick Start Guide](getting-started.md)** — copy the template, build
   it with TinyGo, play it in the browser and in your terminal, pack a
   `.rcart`. About twenty minutes.
-- **[cartlib reference](cartlib.md)** — the whole author-facing surface:
+- **[cartlib guide](cartlib.md)** — the whole author-facing surface:
   drawing, input, sound, storage, the shared score table, the cabinet's
   LCDs and button lights.
-- **[ui reference](ui.md)** — canvas, fonts, widgets, menus, name entry,
+- **[ui guide](ui.md)** — canvas, fonts, widgets, menus, name entry,
   hold-to-confirm, scenes, layers.
 - **[Authoring patterns](patterns.md)** — every rule was a shipped bug
   first. Read it before you polish, not after.

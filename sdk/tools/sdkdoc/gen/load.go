@@ -26,17 +26,20 @@ type Package struct {
 	Dir string
 	// Page is the generated page's file name under sdk/docs/api.
 	Page string
+	// Guide is a Markdown link, relative to sdk/docs/api, to the
+	// hand-written page that tours the package.
+	Guide string
 }
 
 // Packages lists the SDK packages in the reference, in sidebar order.
 var Packages = []Package{
-	{"cartlib", "cartlib.md"},
-	{"cartlib/hosttest", "cartlib-hosttest.md"},
-	{"ui", "ui.md"},
-	{"ui/input", "ui-input.md"},
-	{"fsm", "fsm.md"},
-	{"levels", "levels.md"},
-	{"levels/packfile", "levels-packfile.md"},
+	{"cartlib", "cartlib.md", "[the cartlib guide](../cartlib.md)"},
+	{"cartlib/hosttest", "cartlib-hosttest.md", "[Testing](../cartlib.md#testing) in the cartlib guide"},
+	{"ui", "ui.md", "[the ui guide](../ui.md)"},
+	{"ui/input", "ui-input.md", "[the ui guide](../ui.md)"},
+	{"fsm", "fsm.md", "[Screen state](../ui.md#screen-state-sdkfsm) in the ui guide"},
+	{"levels", "levels.md", "[tutorial part 3](../tutorial-levels.md), which builds a pack end to end"},
+	{"levels/packfile", "levels-packfile.md", "[the levels file reference](../reference-levels.md)"},
 }
 
 // Commands lists the SDK's command directories, relative to the SDK root.

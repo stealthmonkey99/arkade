@@ -96,7 +96,7 @@ func putLEUint32(b []byte, v uint32) {
 }
 
 // cartlib.Run registers the Game at package level, not in main, which the
-// host never calls; see the cartlib reference, "Registration and the
+// host never calls; see the cartlib guide, "Registration and the
 // reactor model".
 var game = &demoGame{}
 var _ = cartlib.Run(game)

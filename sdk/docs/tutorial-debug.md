@@ -194,6 +194,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -221,19 +222,45 @@ func loadCatcherWasm(t *testing.T) []byte {
 	return data
 }
 
-// newCatcherHost is the scripted host every test starts from. FakeHost
-// clamps at the last RandScript value once the script runs out, so two
-// numbers describe a whole endless run: one fruit into the basket, then
-// column 0 forever.
-func newCatcherHost() *carttest.FakeHost {
+// newCatcherHost is the scripted host every test starts from. It mounts the
+// cartridge's assets/ directory the way a .rcart carries it, because the
+// sprites and sounds live in the bundle and not in catcher.wasm: without it
+// the frames are drawn from empty sheets. FakeHost clamps at the last
+// RandScript value once the script runs out, so two numbers describe a
+// whole endless run: one fruit into the basket, then column 0 forever.
+func newCatcherHost(t *testing.T) *carttest.FakeHost {
+	t.Helper()
 	host := carttest.NewFakeHost()
+	if err := host.MountAssets("."); err != nil {
+		t.Fatalf("MountAssets: %v", err)
+	}
 	host.RandScript = []uint64{catcherStartColumn, 0}
 	return host
 }
 
+// catcherOptions hands the harness the lamp cues manifest.json lists under
+// assets.lights — the only paths host_lights_play will accept, exactly as
+// on the cabinet. Without them the game-over cue is refused.
+func catcherOptions(t *testing.T) carttest.Options {
+	t.Helper()
+	raw, err := os.ReadFile("manifest.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m struct {
+		Assets struct {
+			Lights []string `json:"lights"`
+		} `json:"assets"`
+	}
+	if err := json.Unmarshal(raw, &m); err != nil {
+		t.Fatal(err)
+	}
+	return carttest.Options{BundleLights: m.Assets.Lights}
+}
+
 func newCatcherCartridge(t *testing.T, host carttest.Host) *carttest.Cartridge {
 	t.Helper()
-	cart, err := carttest.NewCartridge(context.Background(), loadCatcherWasm(t), host, carttest.Options{})
+	cart, err := carttest.NewCartridge(context.Background(), loadCatcherWasm(t), host, catcherOptions(t))
 	if err != nil {
 		t.Fatalf("NewCartridge: %v", err)
 	}
@@ -281,7 +308,7 @@ func catcherPress(t *testing.T, cart *carttest.Cartridge, key uint8) {
 // same way, every time.
 func catcherJourney(t *testing.T, dump bool) (*carttest.Cartridge, *carttest.FakeHost) {
 	t.Helper()
-	host := newCatcherHost()
+	host := newCatcherHost(t)
 	cart := newCatcherCartridge(t, host)
 
 	catcherTick(t, cart, 3)
@@ -296,7 +323,7 @@ func catcherJourney(t *testing.T, dump bool) (*carttest.Cartridge, *carttest.Fak
 		carttest.GoldenFrame(t, "catcher-wave", carttest.MatrixFrame(t, host.LastBlit(t)))
 	}
 
-	catcherTick(t, cart, 78) // 90 in total: fruit in flight
+	catcherTick(t, cart, 63) // 75 in total: the first fruit in flight
 	if dump {
 		carttest.GoldenFrame(t, "catcher-playing", carttest.MatrixFrame(t, host.LastBlit(t)))
 	}
@@ -318,7 +345,9 @@ func TestCatcherDeterminism(t *testing.T) {
 
 // TestCatcherScoresACatchAndEndsOnThreeMisses is the correctness
 // anchor. Without one of these, a golden suite only proves the binary
-// still draws whatever it drew last time.
+// still draws whatever it drew last time. The game-over LCD shows the
+// table's best, and on the fake host's empty table that is this run's
+// score: BEST 10 means exactly one fruit was caught.
 func TestCatcherScoresACatchAndEndsOnThreeMisses(t *testing.T) {
 	cart, host := catcherJourney(t, false)
 
@@ -327,17 +356,11 @@ func TestCatcherScoresACatchAndEndsOnThreeMisses(t *testing.T) {
 		host.Mu.Lock()
 		line1 := carttest.LastLCDLine1(host, int(catcherSeat))
 		host.Mu.Unlock()
-		if line1 == "GAME OVER" {
-			host.Mu.Lock()
-			line2 := host.LCDTexts[len(host.LCDTexts)-1].Line2
-			host.Mu.Unlock()
-			if line2 != "SCORE 10" {
-				t.Fatalf("game-over LCD line 2 = %q, want %q — the script catches exactly one fruit", line2, "SCORE 10")
-			}
+		if line1 == "BEST 10" {
 			return
 		}
 	}
-	t.Fatal("the scripted run never reached game over")
+	t.Fatal("the scripted run never reached game over on a score of 10")
 }
 
 // TestCatcherWasmMatchesSource closes the one gap the goldens cannot
@@ -380,16 +403,29 @@ human can review, and a diff you skimmed is a golden you did not write:
 
 ```text
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-aabaabbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccaaccaacca
-abbaababaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccaaccaacca
+abbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ...
-aeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaacaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaaaaaaaaaaaaaeffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 --- legend ---
 a = #080c1a/ff
-b = #ffd65c/ff   ← the score
-c = #e8424a/ff   ← three life pips
-e = #5c96ff/ff   ← the dash meter, full
+b = #5c96ff/ff   ← the dash meter, full
+c = #56b446/ff   ← the fruit's stem
+e = #ff9696/ff   ← its highlight
+f = #e8424a/ff   ← the fruit
 ```
+
+The score and lives are not in the frame at all: they are on the LCD,
+which is why the correctness anchor above reads the LCD rather than
+pixels.
+
+Two calls in the skeleton set the harness up the way a cabinet would,
+and a suite without them records different goldens from the reference
+one. `MountAssets` loads the cartridge's `assets/` tree as the bundle
+carries it, so the frames have their sprites rather than empty sheets.
+`catcherOptions` passes the lamp cues `manifest.json` lists, the only
+paths the host will play, so the game-over cue runs rather than being
+refused.
 
 Two more tests belong in every suite, and neither is optional:
 
@@ -537,9 +573,9 @@ is left is mostly depth:
 - **[Seating & rotation](seating.md)** before you write anything with a
   second player. The rules there have sharp edges and none of them are
   guessable.
-- **[The ui reference](ui.md)** for the widgets Catcher never needed —
+- **[The ui guide](ui.md)** for the widgets Catcher never needed —
   [menus](ui.md#menu), layers and compositors.
-- **[The cartlib reference](cartlib.md)** for
+- **[The cartlib guide](cartlib.md)** for
   [storage](cartlib.md#storage), which this game deliberately does not
   use, and the rest of the peripheral surface.
 - **Steal from real games.** In the `arkade-cartridges` repo, `life` is

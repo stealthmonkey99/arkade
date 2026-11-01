@@ -1,29 +1,46 @@
-# Getting started: your first cartridge
+# Quick Start Guide
 
-This walkthrough takes you from the SDK's starter template to a packed
-`.rcart` bundle playing in your browser and in a terminal. Nothing here
-needs a cabinet, a Raspberry Pi, or a USB stick.
+The fast path from the SDK's starter template to your own cartridge
+running in a browser and a terminal, then packed as a `.rcart`. It
+deliberately skips the fun parts — sprites, sound, lights, screens,
+levels — so you see the whole loop working first; the
+[tutorial](tutorial.md) builds a complete game with all of them. Nothing
+here needs a cabinet, a Raspberry Pi, or a USB stick.
 
 ## 0. Prerequisites
 
-- **TinyGo 0.42.0 with Go 1.25–1.27** — TinyGo compiles the cartridge
-  to wasm and refuses any other Go version. You only need it to produce
-  a `.wasm`; plain `go build` / `go test` on your game logic never touch
-  it (see [Test as you go](#5-test-as-you-go)).
-- **Go 1.23.4+** for host-side tests and the engine itself (its
-  `go.mod` floor); the Go you installed for TinyGo covers it. Full
-  requirements: [the engine README](../../README.md#requirements).
+- **Go 1.27** — the current Go release, and the newest one TinyGo
+  0.42.0 accepts (it takes 1.25 through 1.27 and refuses anything
+  else). The `go 1.23` line in a cartridge's `go.mod` is a floor, not
+  the version to install: it is the oldest Go the SDK still compiles
+  with, and any newer Go satisfies it, the engine's own 1.23.4 floor
+  included ([engine requirements](../../README.md#requirements)).
+- **TinyGo 0.42.0** — compiles the cartridge to wasm, and is the version
+  the engine's CI builds with. You need it only to produce a `.wasm`;
+  plain `go build` / `go test` on your game logic never touch it (see
+  [Test as you go](#5-test-as-you-go)).
 - **An engine checkout** — `github.com/stealthmonkey99/arkade`, cloned
-  beside your cartridge library (layout below). Your cartridge reaches
-  into it for the SDK modules and the build tools.
+  beside your cartridge library (layout below). Your cartridge's
+  `Makefile` runs the engine's build tools from it; the SDK modules
+  themselves come from the Go module proxy.
+
+On macOS, with [Homebrew](https://brew.sh):
 
 ```sh
-brew install tinygo-org/tools/tinygo   # macOS
-# other platforms: https://tinygo.org/getting-started/install/
+brew install go
+brew install tinygo-org/tools/tinygo
+go version        # go1.27.x
+tinygo version    # 0.42.0 is the pinned release
 ```
 
-Homebrew installs the latest TinyGo, so check that `tinygo version`
-reports 0.42.0 before you build.
+On other platforms, Go is at [go.dev/dl](https://go.dev/dl/) and TinyGo
+at [tinygo.org](https://tinygo.org/getting-started/install/). Homebrew
+always installs the newest release of each: a newer TinyGo builds your
+cartridge too as long as it accepts your Go, but for the exact pinned
+compiler take TinyGo 0.42.0 from its
+[release page](https://github.com/tinygo-org/tinygo/releases/tag/v0.42.0),
+and once Homebrew's Go moves past 1.27, install a 1.27 from
+[go.dev/dl](https://go.dev/dl/).
 
 Then clone the engine into the folder that will also hold your
 cartridge library (`my-cartridges/`, created in the next step), so the
@@ -61,36 +78,78 @@ rm template.wasm            # the template's own checked-in build
 
 Then make it yours, in order.
 
-**First, `go.mod`** — rename the module (say
-`arkade-my-game-cartridge`) and resolve the SDK. Either require the
-tagged modules, or build against your engine checkout by pointing the
-two `replace` paths at it, as here;
-[Module resolution](../README.md#module-resolution) covers both:
+**First, `go.mod`** — rename the module; nothing else changes. The
+template requires the published SDK modules, so the copy builds
+anywhere and `go` fetches them from the module proxy on the first
+build, checked against the `go.sum` that came with the copy:
 
 ```go-mod file=go.mod
 module arkade-my-game-cartridge
 
 go 1.23
 
-require github.com/stealthmonkey99/arkade/sdk/cartlib v0.1.0
-require github.com/stealthmonkey99/arkade/sdk/ui v0.1.0
+require (
+	github.com/stealthmonkey99/arkade/sdk/cartlib v0.1.0
+	github.com/stealthmonkey99/arkade/sdk/ui v0.1.0
+)
+```
 
+`ui` is required even if you import only `cartlib`, which depends on
+it. Add `sdk/fsm` and `sdk/levels` the same way when the game uses them
+(`go get github.com/stealthmonkey99/arkade/sdk/fsm@v0.1.0`).
+
+*Optional, for working on the SDK itself:* to build against your
+engine checkout's copy instead of the published modules, add a
+`replace` for every SDK module the build uses — `replace` directives
+are not transitive, so `ui` needs its own:
+
+```go-mod fragment
 replace github.com/stealthmonkey99/arkade/sdk/cartlib => ../../arkade/sdk/cartlib
 replace github.com/stealthmonkey99/arkade/sdk/ui => ../../arkade/sdk/ui
 ```
 
-Both `replace` lines matter even if you only import `cartlib`: it
-depends on `ui`, and `replace` directives are not transitive.
+[Module resolution](../README.md#module-resolution) has the detail.
 
-**Then `manifest.json`** — set your own `slug` (`"my-game"`), `title`,
-`description`, and `version`. The slug must match your directory name
-and, later, your `.rcart` filename. The full schema is in
-[Manifests & packaging](packaging.md).
+**Then `manifest.json`** — the template's, with the four fields that
+are yours changed:
 
-**Then the `Makefile`** — one line, `ARKADE ?= ../../arkade`: the path
-to the engine checkout. Everything else in it is derived — it reads
-`slug` out of `manifest.json` to name its outputs — so there is nothing
-else to edit, now or as the game grows.
+```json file=manifest.json
+{
+  "schemaVersion": 1,
+  "abi": 1,
+  "slug": "my-game",
+  "title": "My Game",
+  "publisher": "arkade",
+  "author": "Your Name",
+  "version": "0.1.0",
+  "description": "One card-sized sentence about the game",
+  "tags": ["sim"],
+  "players": ["1p"],
+  "audience": "all-ages",
+  "capabilities": [],
+  "visibility": "public",
+  "icon": "assets/icon.png",
+  "links": { "source": null }
+}
+```
+
+`slug` must match your directory name and, later, your `.rcart`
+filename; `title` is what the menu shows; `author` and `description`
+(at most 160 bytes) are yours. Leave the rest for now — `tags`,
+`players` and the others are explained field by field in
+[Manifests & packaging](packaging.md#the-bundle-manifest-schema).
+
+**Then the `Makefile`** — one line, the path to the engine checkout.
+The template ships with `../..`, right for where it sits inside the
+engine; from `my-cartridges/my-game` it is:
+
+```make file=Makefile start=11 fragment
+ARKADE ?= ../../arkade
+```
+
+Everything else in it is derived — it reads `slug` out of
+`manifest.json` to name its outputs — so there is nothing else to edit,
+now or as the game grows.
 
 **Then `main.go`** — nothing about the manifest. `make build` generates
 `manifest_gen.go` from `manifest.json` before every compile; that file
@@ -148,11 +207,11 @@ Three things to internalize right away:
 
 - **Registration happens at the package level**, never inside `main` —
   the host never calls `main`. `var _ = cartlib.Run(game)` is the one
-  supported shape (see [cartlib reference](cartlib.md#registration-and-the-reactor-model)).
+  supported shape (see [cartlib guide](cartlib.md#registration-and-the-reactor-model)).
 - **`Manifest` returns `manifestBytes`** from the generated
   `manifest_gen.go` and nothing else — the build's `wasmfix` pass
   depends on `cart_manifest` resolving to compile-time constants (see
-  [cartlib reference](cartlib.md#the-manifest-method)).
+  [cartlib guide](cartlib.md#the-manifest-method)).
 - **Quit is handled for you.** cartlib answers q, escape and the red B
   button with `cartlib.Exit()`. A game with its own quit flow (a "hold B
   to quit" overlay) implements `cartlib.QuitOwner` and calls `Exit`
@@ -169,15 +228,18 @@ randomness only from `RandomU64`, the calls that fail silently.
 make build      # from my-cartridges/my-game — manifestgen + tinygo build + wasmfix → my-game.wasm
 ```
 
-Under the hood this is three steps, and all three always run:
+Under the hood this is four steps. The two generators always run and
+leave an up-to-date file alone; the compile and the fix-up run when a
+source is newer than the `.wasm`:
 
 ```sh
+go -C ../../arkade run ./tools/genlevelpack "$PWD"         # level packs; a no-op without one
 go -C ../../arkade run ./sdk/tools/manifestgen "$PWD"
 tinygo build -target=wasi -scheduler=none -gc=leaking -opt=z -no-debug -panic=trap -o my-game.wasm .
 go -C ../../arkade run ./tools/wasmfix -in "$PWD/my-game.wasm" -out "$PWD/my-game.wasm"
 ```
 
-The first and last lines run the engine's tools from the engine's own module
+The `go -C` lines run the engine's tools from the engine's own module
 (`go -C` changes into it first — your cartridge is a separate module and
 cannot `go run` a path outside itself), which is why the Makefile hands
 them absolute paths.
@@ -260,13 +322,9 @@ game as `my-game_golden_test.go`, in the cartridge's own module (copy
 through the engine's `carttest` harness with a fixed RNG script and
 fixed timing, asserts ASCII snapshots of the frames, and checks that two
 runs are byte-identical. The harness lives in the engine module, so the
-test needs the engine in `go.mod` —
-`require github.com/stealthmonkey99/arkade v0.1.0` and
-`replace github.com/stealthmonkey99/arkade => ../../arkade`, plus
-`replace github.com/stealthmonkey99/arkade/sdk/levels => ../../arkade/sdk/levels`
-to keep `sdk/levels` on your checkout too (the engine's own replace for
-that module does not carry over, so without this line `v0.1.0` comes from
-the module proxy) — then `go mod tidy`. Only host-side test code imports
+test needs the engine in `go.mod`: with the file in place, `go mod tidy`
+adds `require github.com/stealthmonkey99/arkade v0.1.0` and its
+dependencies. Only host-side test code imports
 it; nothing in the TinyGo build sees it. That determinism check is the ABI's core promise — see [ABI
 reference](abi.md#determinism) for what your game must (and must not)
 do to keep it. Regenerate snapshots after intentional visual changes
@@ -351,7 +409,7 @@ report line by line.
   (rendered on the site with these docs; `go doc` and pkg.go.dev show
   the same comments). Regenerate with `make sdk-docs`; `sdkdoc -check`
   and `make test` fail when a page is stale.
-- Make it a real game: [cartlib reference](cartlib.md) for input,
+- Make it a real game: [cartlib guide](cartlib.md) for input,
   sound, storage, scores, and the cabinet peripherals; [ui
   reference](ui.md) for menus, fonts, name entry, and scenes.
 - Steal from the reference cartridges in the public cartridge

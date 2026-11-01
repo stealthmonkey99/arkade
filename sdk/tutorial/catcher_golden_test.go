@@ -224,14 +224,15 @@ func catcherJourney(t *testing.T, dump bool) (*carttest.Cartridge, *carttest.Fak
 
 	catcherPress(t, cart, carttest.KeyJoyA) // title -> playing
 
-	// early enough that the first wave is still announcing itself: the only
-	// frame showing the level name from assets/waves.arkadelevels
+	// early enough that the first wave is still announcing itself over an
+	// empty sky: the only frame showing the level name from
+	// assets/waves.arkadelevels
 	catcherTick(t, cart, 12)
 	if dump {
 		carttest.GoldenFrame(t, "catcher-wave", carttest.MatrixFrame(t, host.LastBlit(t)))
 	}
 
-	catcherTick(t, cart, 78) // 90 in total: fruit in flight, nothing resolved yet
+	catcherTick(t, cart, 63) // 75 in total: the first fruit in flight, nothing resolved yet
 	if dump {
 		carttest.GoldenFrame(t, "catcher-playing", carttest.MatrixFrame(t, host.LastBlit(t)))
 	}
@@ -259,16 +260,18 @@ func tickUntilLCD(t *testing.T, cart *carttest.Cartridge, host *carttest.FakeHos
 
 // TestCatcherScoresACatchAndEndsOnThreeMisses is the correctness anchor: the
 // scripted run must produce the outcome the script describes, which goldens
-// alone do not prove.
+// alone do not prove. The game-over LCD shows the table's best rather than
+// repeating the banner, and on the fake host's empty table the best is this
+// run: BEST 10 says exactly one fruit was caught.
 func TestCatcherScoresACatchAndEndsOnThreeMisses(t *testing.T) {
 	cart, host := catcherJourney(t, false)
-	tickUntilLCD(t, cart, host, "GAME OVER", 3000)
+	tickUntilLCD(t, cart, host, "BEST 10", 3000)
 
 	host.Mu.Lock()
 	line2 := host.LCDTexts[len(host.LCDTexts)-1].Line2
 	host.Mu.Unlock()
-	if line2 != "SCORE 10" {
-		t.Errorf("game-over LCD line 2 = %q, want %q — the scripted run catches exactly one fruit", line2, "SCORE 10")
+	if line2 != "NEW BEST!" {
+		t.Errorf("game-over LCD line 2 = %q, want %q — the first score on an empty table is a new best", line2, "NEW BEST!")
 	}
 
 	carttest.GoldenFrame(t, "catcher-gameover", carttest.MatrixFrame(t, host.LastBlit(t)))
@@ -276,6 +279,27 @@ func TestCatcherScoresACatchAndEndsOnThreeMisses(t *testing.T) {
 	// the bed stops and the game-over sting fires after the fatal miss
 	if id := carttest.SoundLoadedID(host, "assets/gameover.wav"); !carttest.SoundPlayed(host, id) {
 		t.Error("the game-over sting never played")
+	}
+}
+
+// TestCatcherLCDWritesOnlyWhenTheReadoutChanges: score and lives are the
+// LCD's, and they move only on a catch or a miss, so the frames between the
+// run's start and its first catch must leave the display alone.
+func TestCatcherLCDWritesOnlyWhenTheReadoutChanges(t *testing.T) {
+	host := newCatcherHost(t)
+	cart := newCatcherCartridge(t, host)
+	catcherPress(t, cart, carttest.KeyJoyA)
+
+	host.Mu.Lock()
+	mark := len(host.LCDTexts)
+	host.Mu.Unlock()
+	tickUntilLCD(t, cart, host, "֍ 10", 300)
+
+	host.Mu.Lock()
+	writes := len(host.LCDTexts) - mark
+	host.Mu.Unlock()
+	if writes != 1 {
+		t.Errorf("the LCD was written %d times between the run's start and its first catch, want 1 (the catch)", writes)
 	}
 }
 
@@ -317,6 +341,43 @@ func TestCatcherDashLightIsEligibilityOnly(t *testing.T) {
 	catcherTick(t, cart, 60)
 	if !lastLightsFor(host, int(catcherSeat)).Lights[maskJoyD] {
 		t.Error("blue never came back after the cooldown")
+	}
+}
+
+// TestCatcherLightsWriteOnlyWhenEligibilityChanges: like the LCD, the lamps
+// are written when what they say changes — a dash spent, a dash back — and
+// left alone on every frame between.
+func TestCatcherLightsWriteOnlyWhenEligibilityChanges(t *testing.T) {
+	cart, host := catcherJourney(t, false)
+	host.Mu.Lock()
+	mark := len(host.ButtonLights)
+	host.Mu.Unlock()
+
+	catcherTick(t, cart, 10)
+	catcherPress(t, cart, carttest.KeyJoyD)
+	catcherTick(t, cart, 60) // past the cooldown, short of the third miss
+
+	host.Mu.Lock()
+	writes := len(host.ButtonLights) - mark
+	host.Mu.Unlock()
+	if writes != 2 {
+		t.Errorf("the lamps were written %d times across 70 frames and one dash, want 2 (spent, then back)", writes)
+	}
+}
+
+// TestCatcherOnePlayerRunBlanksTheIdleSeat: the title invites both seats,
+// and once seat 1 starts, seat 2's LCD and lamps go dark.
+func TestCatcherOnePlayerRunBlanksTheIdleSeat(t *testing.T) {
+	_, host := catcherJourney(t, false)
+	const idleSeat = 1
+	host.Mu.Lock()
+	line1 := carttest.LastLCDLine1(host, idleSeat)
+	host.Mu.Unlock()
+	if line1 != "" {
+		t.Errorf("the idle seat's LCD line 1 = %q during a one-player run, want blank", line1)
+	}
+	if got := lampMaskString(lastLightsFor(host, idleSeat)); got != "000000" {
+		t.Errorf("the idle seat's lamps = %s during a one-player run, want all dark", got)
 	}
 }
 
@@ -405,9 +466,11 @@ func TestCatcherNameEntryBareBKeepsTheScore(t *testing.T) {
 
 // TestCatcherNameEntryConfirmCancelsAndSubmits: any non-B press closes the
 // overlay and the entry underneath stays live and submittable. The golden
-// frame is the overlay over the entry, not over a frozen playfield.
+// frames are the entry, then the overlay over it rather than over a frozen
+// playfield.
 func TestCatcherNameEntryConfirmCancelsAndSubmits(t *testing.T) {
 	cart, host := catcherReachNameEntry(t)
+	carttest.GoldenFrame(t, "catcher-nameentry", carttest.MatrixFrame(t, host.LastBlit(t)))
 
 	catcherPress(t, cart, carttest.KeyJoyB) // opens the confirm
 	catcherTick(t, cart, 2)
@@ -470,7 +533,7 @@ func TestCatcherManifestListsALampCue(t *testing.T) {
 // seat only, walked by the host on the engine clock, and ends dark.
 func TestCatcherGameOverPlaysItsLampCue(t *testing.T) {
 	cart, host := catcherJourney(t, false)
-	tickUntilLCD(t, cart, host, "GAME OVER", 3000)
+	tickUntilLCD(t, cart, host, "BEST 10", 3000)
 
 	// frame 0 lands on the play call, inside the tick that ended the run
 	if got := lampMaskString(lastLightsFor(host, int(catcherSeat))); got != "111111" {

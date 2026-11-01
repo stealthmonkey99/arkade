@@ -1,64 +1,95 @@
 # Årkade SDK documentation
 
-Årkade games are **cartridges**: a single `.wasm` binary that runs
-unmodified on two hosts — the physical cabinet (a 64×64 LED matrix,
-two joysticks, two little LCDs, lit arcade buttons) and the browser
-player at arkade.build. You write ordinary Go, compile it with TinyGo,
-and the same file plays in both places, pixel for pixel.
+Welcome! Årkade games are **cartridges**: a single `.wasm` file you
+write in Go and compile with TinyGo. The same file runs unchanged on the
+cabinet — a 64×64 LED panel, two small LCDs, two joysticks and lit
+arcade buttons — and in the browser player at arkade.build, which
+emulates the cabinet on your screen.
 
-That promise rests on one idea: **everything a frame shows is a pure
-function of the frame's time delta, its input records, and the host's
-seeded RNG**. No wall clocks, no OS randomness, no hidden state. It is
-what makes a recorded game replayable, lets golden tests diff frames
-byte-for-byte across hosts, and will one day let a leaderboard verify a
-score by replaying its inputs.
+Cartridges are **deterministic**: the same inputs always produce the
+same frames. That is what makes replays and frame-exact tests work; the
+[Game Engine Primer](engine-primer.md#6-randomness-and-determinism)
+explains it, and the few rules it asks of you, in depth.
 
-## The 30-second model
+Ready to build one? Start with the [Quick Start Guide](getting-started.md).
 
-- You implement `cartlib.Game` — five methods: `Manifest`, `Init`,
-  `HandleInput`, `Update`, `Render`. `Init` receives the `Setup` that
-  loads assets and binds input, and only `Init` ever gets one.
-- The host drives the loop ~30 times a second:
-  `HandleInput → Update(dt) → Render(framebuffer)`.
-- You draw with the shared [`ui` widget toolkit](ui.md) (the same code
-  the cabinet's own menus use) or raw framebuffer pixels.
-- `cartlib` supplies all the wasm plumbing — you never write a raw
-  export or import.
-- `rcartpack` bundles your wasm + manifest + assets into a `.rcart`
-  file anyone can drop onto a cabinet or a browser.
+## How a cartridge fits together
+
+```figure cartridge-parts
+A .rcart is one file with three parts inside. The host loads it, runs
+its loop and owns every output.
+```
+
+- **The `.wasm`** is your code implementing `cartlib.Game` — `Manifest`,
+  `Init`, `HandleInput`, `Update`, `Render` — drawing with the
+  [`ui`](ui.md) toolkit, with `cartlib` doing all the wasm plumbing.
+- **`manifest.json`** names the game: slug, title, version,
+  description, players, icon. [Packaging](packaging.md) has the full
+  schema.
+- **`assets/`** holds the files the game loads in `Init`: sprites,
+  sounds, glyphs, lamp sequences, art. See [Asset Files](reference-assets.md).
+- **The host**, the cabinet or the browser player, runs `HandleInput →
+  Update(dt) → Render` about 30 times a second and drives the panel,
+  the LCDs, the lit buttons and the speaker.
+
+`rcartpack` builds the `.rcart` for you.
 
 ## The documentation set
 
+The sidebar follows these tables, top to bottom.
+
+**Learn** — read in order the first time.
+
 | Doc | What it covers |
 | --- | --- |
-| [Engine primer](engine-primer.md) | How game engines work in general — loop, frames, sprites, input, state, determinism, audio — each idea tied straight to where it lives here |
-| [Getting started](getting-started.md) | Build your first cartridge: template → build → play in the browser and terminal → pack a `.rcart` |
-| [Gotchas](gotchas.md) | The platform traps that compile fine and fail later, one line each, with the symbol that documents or enforces it |
+| [Quick Start Guide](getting-started.md) | Build your first cartridge: template → build → play in the browser and terminal → pack a `.rcart` |
+| [Game Engine Primer](engine-primer.md) | How game engines work in general — loop, frames, sprites, input, state, determinism, audio — each idea tied straight to where it lives here |
 | [Tutorial](tutorial.md) | Build one complete game start to finish, in four parts: [the game](tutorial.md), [sprites & sound](tutorial-assets.md), [authored waves](tutorial-levels.md), [play & ship](tutorial-debug.md) |
-| [API reference](api/cartlib.md) | Generated from the Go doc comments, one page per package: [cartlib](api/cartlib.md), [cartlib/hosttest](api/cartlib-hosttest.md), [ui](api/ui.md), [ui/input](api/ui-input.md), [fsm](api/fsm.md), [levels](api/levels.md), [levels/packfile](api/levels-packfile.md). Never hand-edited |
-| [cartlib reference](cartlib.md) | The SDK library: the `Game` interface, drawing, input, sound, storage, scores, peripherals |
-| [ui reference](ui.md) | The shared widget toolkit: canvas, fonts, widgets, menus, name entry, compositor - and sdk/fsm, the screen-state machine |
-| [ABI reference](abi.md) | The wasm contract itself: exports, host imports, input records, determinism rules |
-| [Manifests & packaging](packaging.md) | The manifest schema, the `.rcart` bundle format, `rcartpack`, installing on a cabinet |
-| [Authoring patterns](patterns.md) | Hard-won design lessons, distilled, with pointers to the full reference pages |
-| [Seating & rotation](seating.md) | Where each player sits, which way the board faces, and who is allowed to press what |
-| [Glossary](glossary.md) | Every term this doc set uses, alphabetical, one to three sentences each |
 
-**Reference: hand-editable file formats**, for anyone who would rather
-not use the lab tools:
+**Guides** — read these for understanding: what to reach for, in what
+order, and where it trips you.
 
 | Doc | What it covers |
 | --- | --- |
-| [Asset file reference](reference-assets.md) | The envelope every asset kind shares: the naming rule, the JSON fields, where it lives in a PNG/WAV/JSON file, determinism, packaging |
-| [Sprite reference](reference-sprite.md) | The `sprite` kind in full: cels, animations, what's a structural error versus repaired, generated identifiers |
-| [Sound reference](reference-sound.md) | The `sound` kind in full: the `arkd` chunk, the render block, the recipe's composition tree, one node versus a mix, loading and generating one |
-| [Glyph reference](reference-glyph.md) | The `glyph` kind in full: the 5×8 row bit layout, why ASCII is refused, the 32-rune cap, listing glyphs in the manifest, shadowing and teardown |
-| [Levels reference](reference-levels.md) | The `levels` kind: the optional front-matter grammar, the naming rule (`.arkadelevels`), a file with no envelope, generator pinning — the pack body itself is `sdk/levels/packfile`'s own spec |
-| [HID profile and input channel reference](reference-hid.md) | The `hid` kind in full — the report field grammar, the `standard` block, seat and mount remapping — and the input-channel ABI a cartridge reads it through, including what a browser tab cannot do |
-| [Lamp sequence reference](reference-lights.md) | The `lights` kind in full: the frame model, the mask bit table, the three loop modes, naming one seat or both, and the two imports that play one on the tick |
-| [Microphone and sound model reference](reference-mic.md) | The `mic` kind in full — the front end, the segmenter, classes and cues, how a model is trained — and the microphone keys a cartridge reads it through, including why a gesture is never the only way to do something |
+| [cartlib](cartlib.md) | The cartridge library: the `Game` interface, drawing, input, sound, storage, scores, peripherals |
+| [ui](ui.md) | The widget toolkit: canvas, fonts, widgets, menus, name entry, compositor, and `sdk/fsm`, the screen-state machine |
+| [Authoring Patterns](patterns.md) | Hard-won design lessons, one paragraph each, on six pages: [the hardware](patterns-hardware.md), [art & sound](patterns-art-sound.md), [loading & attract](patterns-loading-attract.md), [seating & rotation](seating.md), [testing & debugging](patterns-testing.md) and [gotchas](gotchas.md) |
 
-If you are new, read [Getting started](getting-started.md) first — it
+**References** — look things up here rather than read them through.
+
+*[API Reference](api.md)* — one page per package, generated from the Go
+doc comments (never hand-edited): every exported name with its exact
+contract. [cartlib](api/cartlib.md), [cartlib/hosttest](api/cartlib-hosttest.md),
+[ui](api/ui.md), [ui/input](api/ui-input.md), [fsm](api/fsm.md),
+[levels](api/levels.md), [levels/packfile](api/levels-packfile.md).
+
+*Asset Formats* — the files the lab tools write, documented for anyone
+who would rather edit them by hand.
+
+| Doc | What it covers |
+| --- | --- |
+| [Asset File Reference](reference-assets.md) | The envelope every asset kind shares: the naming rule, the JSON fields, where it lives in a PNG/WAV/JSON file, determinism, packaging |
+| [Sprites](reference-sprite.md) | The `sprite` kind in full: cels, animations, what's a structural error versus repaired, generated identifiers |
+| [Sounds](reference-sound.md) | The `sound` kind in full: the `arkd` chunk, the render block, the recipe's composition tree, one node versus a mix, loading and generating one |
+| [Glyphs](reference-glyph.md) | The `glyph` kind in full: the 5×8 row bit layout, why ASCII is refused, the 32-rune cap, listing glyphs in the manifest, shadowing and teardown |
+| [Levels](reference-levels.md) | The `levels` kind: the optional front-matter grammar, the naming rule (`.arkadelevels`), a file with no envelope, generator pinning — the pack body itself is `sdk/levels/packfile`'s own spec |
+| [HID & Input Channels](reference-hid.md) | The `hid` kind in full — the report field grammar, the `standard` block, seat and mount remapping — and the input-channel ABI a cartridge reads it through, including what a browser tab cannot do |
+| [Lamp Sequences](reference-lights.md) | The `lights` kind in full: the frame model, the mask bit table, the three loop modes, naming one seat or both, and the two imports that play one on the tick |
+| [Microphone](reference-mic.md) | The `mic` kind in full — the front end, the segmenter, classes and cues, how a model is trained — and the microphone keys a cartridge reads it through, including why a gesture is never the only way to do something |
+
+*[Platform Contract](platform.md)* — the layer under cartlib. Most
+authors never need it; read it to debug at the boundary, write a host,
+or target the ABI from another language.
+
+| Doc | What it covers |
+| --- | --- |
+| [Manifests & Packaging](packaging.md) | The manifest schema, the `.rcart` bundle format, `rcartpack`, installing on a cabinet |
+| [ABI](abi.md) | The wasm contract itself — what `cartlib` implements for you: exports, host imports, input records, determinism rules |
+
+*[Glossary](glossary.md)* — every term this doc set uses, alphabetical,
+one to three sentences each.
+
+If you are new, read the [Quick Start Guide](getting-started.md) first — it
 walks the whole path and links into the references as it goes.
 
 ## Where the code lives

@@ -25,7 +25,7 @@ is canonical; follow a link when a section says to.
 
 Toolchain versions: [README.md#requirements](../README.md#requirements).
 
-## The 30-second model
+## How a cartridge fits together
 
 - A cartridge is a **wasm module** built with **TinyGo**. It is NOT part of
   the main `github.com/stealthmonkey99/arkade` module — it is its own Go
@@ -176,18 +176,19 @@ game lives in a cartridge library beside it (`../my-cartridges/mygame`).
 1. Copy the starter: `mkdir -p ../my-cartridges && cp -r sdk/template
    ../my-cartridges/mygame && rm ../my-cartridges/mygame/template.wasm`.
    Crib from Life (simplest) or Catcher as the game grows.
-2. **`go.mod`** — its own module, with local `replace`s pointing at the
-   engine checkout. Replaces are NOT transitive: declare BOTH cartlib and
-   ui even though main.go only imports cartlib, and add `sdk/levels` and
-   `sdk/fsm` the same way when the game uses them (`sdk/tutorial/go.mod`
-   has all four):
+2. **`go.mod`** — its own module, requiring the published SDK tags; the
+   template's needs only the module renamed. Require BOTH cartlib and ui,
+   and add `sdk/levels` and `sdk/fsm` with `go get …@v0.1.0` when the game
+   uses them (`sdk/tutorial/go.mod` has all four). To build against a local
+   engine checkout instead, add a `replace` per SDK module — replaces are
+   NOT transitive:
    ```
    module arkade-mygame-cartridge
    go 1.23
-   require github.com/stealthmonkey99/arkade/sdk/cartlib v0.1.0
-   require github.com/stealthmonkey99/arkade/sdk/ui v0.1.0 // indirect if unused directly
-   replace github.com/stealthmonkey99/arkade/sdk/cartlib => ../../arkade/sdk/cartlib
-   replace github.com/stealthmonkey99/arkade/sdk/ui => ../../arkade/sdk/ui
+   require (
+   	github.com/stealthmonkey99/arkade/sdk/cartlib v0.1.0
+   	github.com/stealthmonkey99/arkade/sdk/ui v0.1.0
+   )
    ```
 3. **`manifest.json`** (a real file, packed into the `.rcart`): the slug
    matching the directory, `"abi":1`, title, version, description and
@@ -202,9 +203,8 @@ game lives in a cartridge library beside it (`../my-cartridges/mygame`).
    `.rcart`, `make test` runs host-Go tests.
 6. **Tests**: add `mygame_golden_test.go` beside the game in `package main`
    (so goldens and journeys share the game's helpers), using the exported
-   harness `github.com/stealthmonkey99/arkade/carttest`; add
-   `require github.com/stealthmonkey99/arkade v0.1.0` and
-   `replace github.com/stealthmonkey99/arkade => ../../arkade` to `go.mod`.
+   harness `github.com/stealthmonkey99/arkade/carttest`; `go mod tidy` then
+   adds `require github.com/stealthmonkey99/arkade v0.1.0` to `go.mod`.
    Model the golden on Life's `life_golden_test.go`: instantiate the built
    `.wasm`, drive deterministic frames with a scripted RNG + fixed `dt`,
    assert determinism and a correctness anchor. Test gameplay logic through
@@ -301,7 +301,7 @@ kinds (fans, gates, telegraphed swipes) rect-based.
 ## Designing for 64×64
 
 The camera, emotional-beat, LCD-as-HUD, bloom and dense-board lessons are
-in [patterns](../sdk/docs/patterns.md#designing-for-6464). Beyond those:
+in [patterns](../sdk/docs/patterns-hardware.md#designing-for-6464). Beyond those:
 
 - **8-way stick feel constants**: first step of a held
   direction lands the SAME frame (no debounce), then auto-repeat ~+220 ms
@@ -572,7 +572,7 @@ are fully live. So attract plays **zero sounds** and touches **no
 LCDs/lights**, structurally: a title sting is a pending flag consumed from
 `LoadFrame` or the title `Update`, never played in `Init`. Guard it with a
 golden assertion counting `host_play_sound` across `cart_init` + a long
-attract run: zero. Detail: [patterns](../sdk/docs/patterns.md#attract-mode).
+attract run: zero. Detail: [patterns](../sdk/docs/patterns-loading-attract.md#attract-mode).
 
 ## Determinism & cross-host goldens
 
@@ -604,7 +604,7 @@ routing, sound timing, camera behavior). Drive whole sessions (loader →
 menu → full game → name entry → attract) on the checked-in harness while
 asserting host-call side effects (lock-seat sequences, per-seat light
 masks, sound counts, LCD text). The testing patterns in long form:
-[patterns](../sdk/docs/patterns.md#testing-strategy).
+[patterns](../sdk/docs/patterns-testing.md#testing-strategy).
 
 - **PNG dump hooks inside the golden test**, gated on an env var
   (`MYGAME_DUMP=<dir>` writes every asserted frame as a PNG). This is the
@@ -674,8 +674,8 @@ cabinet and the health check after it:
       `carttest.RequireNoAllocsAfterInit` in the golden suite checks it.
 - [ ] `Manifest` returns the generated `manifestBytes`; `manifest.json` has
       `abi:1` and the right slug/title/players (preflight `manifest`).
-- [ ] `go.mod` has BOTH cartlib and ui replaces (not transitive), plus
-      `sdk/levels`/`sdk/fsm` when used.
+- [ ] `go.mod` requires BOTH cartlib and ui, plus `sdk/levels`/`sdk/fsm`
+      when used; any local `replace` covers each of them (not transitive).
 - [ ] Quit keys: either cartlib's default exit, or `QuitOwner` plus your
       own call to `cartlib.Exit()`.
 - [ ] Gameplay demuxed by `Player` (the compiler already refuses a `Slot`
@@ -926,7 +926,7 @@ checklist:
 - **Keys must match `[A-Za-z0-9_.-]+` — no slashes**; `StorageWrite`
   returns false and nothing else says so. One regression per cartridge
   asserts its real keys and a fresh-instance round trip
-  ([patterns](../sdk/docs/patterns.md#storage-discipline)).
+  ([patterns](../sdk/docs/patterns-testing.md#storage-discipline)).
 
 ### Versions
 

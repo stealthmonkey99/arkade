@@ -8,6 +8,34 @@ it puts a player's own pieces on the far side of the table from them.
 This page is the doctrine: which of three shapes your game is, what that
 implies, and which of the strategy calls to make. Every rule here has a
 cartridge behind it — a shipped, working example, not a hypothetical.
+The strategy calls are affordances with sharp edges, and the browser
+host has them too.
+
+## The rules in brief
+
+Each links to its reasoning further down.
+
+- Physical seat 0 is the panel's **right** side (red stick), seat 1 the
+  left (blue), so a sided board's territory belongs on the **x axis**
+  ([the geometry](#the-geometry-which-is-the-whole-thing)).
+- **A sided board never rotates**, in any mode; 1P gates the idle seat
+  with `StrategyOnePlayerAgainstAI`, not a `Solo` lock
+  ([shape 1](#shape-1--fixed-sides)). A point-of-view flip means the
+  board is on the wrong axis ([the trap](#the-trap-rotation-is-not-a-layout)).
+- `LockPlayerToSeat` only works with a one-player strategy on top of the
+  stack, and never lock to a seat you haven't seen input from
+  ([what the calls do](#what-the-calls-actually-do)).
+- **Quit is never gated**, but nothing else passes — keep your own seat
+  filter ([quit](#quit-is-never-gated)).
+- **2P simultaneous play never locks the engine gate**; **2P alternating
+  turns rotate toward the active player** with pop → lock → push an
+  unlocked `AgainstAI`, unless the waiting player watches the turn
+  ([shape 2](#shape-2--shared-field)).
+- **Unlock before any screen that invites both seats**
+  ([name entry](#name-entry-in-every-shape)).
+- Re-assert LCDs and lights when resuming from any overlay — nothing
+  restores peripheral state for you
+  ([buttons and lights](patterns-hardware.md#buttons-and-lights)).
 
 ## The geometry, which is the whole thing
 
@@ -96,6 +124,8 @@ your own seat filter.
 **Lay the territory out along x, and never rotate.** Red/white/P1 at high
 x, black/blue/P2 at low x, in every mode. Then a 1P player at either seat
 sees their own side naturally, and the same board works unchanged for 2P.
+Track who is where from the presses you observe, never from an
+assumption: a solo player's colour and side follow their joystick.
 
 For 1P you still want the idle seat locked out. Use
 `StrategyOnePlayerAgainstAI`, which gates without rotating:
@@ -135,8 +165,11 @@ hardcoded `0`, and never a seat you have not observed, which gates the
 real player out of their own game.
 
 **2P simultaneous** (both players acting at once — snake, a maze
-shooter, table hockey's 2P): never lock. The panel stays upright and both seats stay
-live. Arbitrate nothing; both are playing.
+shooter, table hockey's 2P): never lock. Push the strategy once at match
+start and leave it unlocked; the panel stays upright and both seats stay
+live. There are no turns to arbitrate, since both are playing, but the
+cartridge still routes each record to its player with its own slot
+filter, which checks quit keys *first*.
 
 **2P alternating turns** (one plays, the other waits — a hopping or
 stacking game played in turns, say): **rotate toward the active player at each turn change.**
@@ -223,6 +256,5 @@ Two rules:
   the ones that call `Exit()` directly rather than going through your own
   `returnToTitle`.
 
-See also: [Authoring patterns](patterns.md#seats-strategy-and-rotation) for
-the short form, and [cartlib reference](cartlib.md) for the call
-signatures.
+See also: [cartlib guide](cartlib.md) for the call signatures, and
+the rest of the [authoring patterns](patterns.md).

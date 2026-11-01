@@ -1,0 +1,14 @@
+// The template and tutorial require the published SDK tags so a copy builds
+// anywhere; this workspace points them at the code beside them instead, and
+// stays behind when sdk/template is copied out.
+go 1.23.4
+
+use (
+	..
+	./cartlib
+	./fsm
+	./levels
+	./template
+	./tutorial
+	./ui
+)

@@ -2,7 +2,7 @@
 
 One-to-three-sentence definitions of the terms this SDK's documentation
 uses, alphabetical, each linking to where it's covered in depth. If a term
-here is new to you, read [Getting started](getting-started.md) or the
+here is new to you, read the [Quick Start Guide](getting-started.md) or the
 [engine primer](engine-primer.md) first — this page assumes the vocabulary
 exists, it doesn't build it from scratch.
 
@@ -65,11 +65,14 @@ plays zero sounds and touches no LCDs or lights. See
 
 ## Browser player (the)
 
-The wasm host running at arkade.build: a browser tab that instantiates a
-cartridge's `.wasm` (or `.rcart`) directly and plays it via drag-and-drop or from `devserve`,
-with keyboard arrows standing in for the joystick. It implements the same
-ABI as the cabinet, so a cartridge needs no browser-specific code, and it
-ports the engine's player strategies, gating and rotation included. See [4. Play it](getting-started.md#4-play-it).
+The host at arkade.build, an emulator of the cabinet: a browser tab that
+runs a cartridge's unmodified `.wasm` (or `.rcart`), dropped onto the page
+or served by `devserve`, and emulates the hardware around it — the 64×64
+panel, the LCDs, the lit buttons and the sticks, with keyboard arrows
+standing in for a joystick. It emulates the machine, not a processor: the
+wasm runs in the browser's own engine against the same ABI as the cabinet,
+so a cartridge needs no browser-specific code, and it ports the engine's
+player strategies, gating and rotation included. See [4. Play it](getting-started.md#4-play-it).
 
 ## Button lamps / eligibility light
 
@@ -78,7 +81,7 @@ The six lit arcade buttons in front of each seat, addressed through
 light a button exactly when pressing it would do something right now —
 an "eligibility light" — never statically, so an always-lit button never
 reads as a mystery control. See
-[Buttons and lights](patterns.md#buttons-and-lights).
+[Buttons and lights](patterns-hardware.md#buttons-and-lights).
 
 ## cartlib
 
@@ -86,7 +89,7 @@ The Go SDK library (`sdk/cartlib`) every cartridge imports: an ergonomic
 wrapper around the raw ABI that supplies every `cart_*` export and wraps
 every `host_*` import, so an author implements one `Game` interface
 instead of writing wasm plumbing by hand. See the
-[cartlib reference](cartlib.md).
+[cartlib guide](cartlib.md).
 
 ## Cartridge
 
@@ -122,7 +125,7 @@ Down Down Left Right Left Right — wired through `cartlib.CheatCode`
 instead of each game inventing its own. Completing it taints the running
 instance so it can never submit a score again, a one-way flag a
 cartridge is expected to show on screen rather than hide. See the
-[cartlib reference](cartlib.md).
+[cartlib guide](cartlib.md).
 
 ## Cue (microphone)
 
@@ -465,7 +468,7 @@ The `sdk/ui` package: a host-free widget library — menus, fonts, name
 entry, hold-to-confirm, layers — shared by every cartridge and the
 cabinet's own shell, so a cartridge that draws with it speaks the
 platform's native visual language and renders identical bytes on both
-hosts. See the [ui reference](ui.md).
+hosts. See the [ui guide](ui.md).
 
 ## Virtual flag (the)
 

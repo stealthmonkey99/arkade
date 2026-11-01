@@ -1,14 +1,16 @@
-# ui reference
+# ui guide
+
+This is the guided tour of `ui` and `fsm` — which widget to reach for and
+how they fit together — while the API references for
+[ui](api/ui.md), [ui/input](api/ui-input.md) and [fsm](api/fsm.md) list
+every exported name with its exact contract, generated from the doc
+comments `go doc` and pkg.go.dev show.
 
 `ui` (`github.com/stealthmonkey99/arkade/sdk/ui`, at `sdk/ui`) is
 the widget toolkit **shared by the cabinet engine and every
 cartridge** — the same `Menu`, the same fonts, the same blend math.
 Drawing through it means your game speaks the cabinet's native visual
-vocabulary, and renders identical bytes on both hosts. This page is the
-tour: which widget to reach for and how they fit together. The
-symbol-by-symbol reference is generated from the doc comments into
-[api/ui.md](api/ui.md), [api/ui-input.md](api/ui-input.md) and
-[api/fsm.md](api/fsm.md); `go doc` and pkg.go.dev show the same comments.
+vocabulary, and renders identical bytes on both hosts.
 
 The package is host-free by construction: no `init()`, no clock, no
 goroutines, no `math/rand`; it imports nothing but `math` and its own `sdk/ui/input`. Everything
@@ -29,9 +31,8 @@ func render(fb *cartlib.Framebuffer) {
 }
 ```
 
-Depending on it takes its own `require` + `replace` pair in your
-`go.mod` — replace directives are not transitive, so cartlib's isn't
-enough ([Getting started](getting-started.md#1-copy-the-template)).
+Your `go.mod` requires it directly, beside `cartlib`; the template's
+already does ([Quick Start Guide](getting-started.md#1-copy-the-template)).
 
 ## Canvas, Color, and primitives
 
@@ -263,7 +264,7 @@ with `Sheet.Cel` at Init (or compile the literals in yourself);
 `ui.OpaqueMask`'s alpha rule (only `A == 255` pixels enter the mask)
 makes anti-aliased edges automatically forgiving.
 `Mask.Overlaps` is pixel-perfect mask-vs-mask collision. The full
-pipeline: [patterns](patterns.md#sprite-art-as-pngs).
+pipeline: [patterns](patterns-art-sound.md#sprite-art-as-pngs).
 
 ### Button hints
 
@@ -706,7 +707,8 @@ reads identically to `Machine`'s. A singleton never needs it.
 [`sdk/fsm/README.md`](../fsm/README.md#arrays-of-entities-idmachine) has
 the details.
 
-Depending on it takes its own `require` + `replace` pair, like `ui`.
+Depending on it takes its own `require` in `go.mod`
+(`go get github.com/stealthmonkey99/arkade/sdk/fsm@v0.1.0`).
 [`sdk/fsm/README.md`](../fsm/README.md) has the five-step adoption
 recipe and the design's list of things it deliberately refuses to be.
 

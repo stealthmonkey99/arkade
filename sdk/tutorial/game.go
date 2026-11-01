@@ -65,12 +65,16 @@ type catcherGame struct {
 	// seat is the physical seat this run is locked to, or
 	// cartlib.SeatNone when the player is on a keyboard with no seat.
 	// It addresses the LCD and the button lights: the input record's
-	// Physical byte, never its Player byte (see the cartlib reference,
+	// Physical byte, never its Player byte (see the cartlib guide,
 	// "Input").
 	seat cartlib.Seat
 
 	stepAcc uint64 // dtMicros accumulated toward the next sim step
-	lcdAcc  uint64 // LCD refresh throttle
+
+	// What the playing LCD and lamps say now, so a frame rewrites them only
+	// on a change.
+	shownScore, shownLives int
+	shownDash              bool
 
 	// Scratch owned by the game, filled once per use. Building these in
 	// Render or Update would allocate every frame, which -gc=leaking
@@ -150,6 +154,7 @@ func (g *catcherGame) startPlay(seat cartlib.Seat) {
 	g.stepAcc = 0
 	g.seat = seat
 	cartlib.LockPlayerToSeat(seat)
+	blankIdleSeat(seat)
 	startMusic()
 	g.machine.Go(stPlaying)
 }
@@ -183,7 +188,6 @@ func (g *catcherGame) submitName() {
 
 func (g *catcherGame) Update(dtMicros uint64) {
 	g.held.Update(dtMicros)
-	g.lcdAcc += dtMicros
 
 	// Tick feeds the clock of the screen on TOP of the stack, and only
 	// that one. That is what freezes a covered screen for free: while the
@@ -231,26 +235,24 @@ func (g *catcherGame) updatePlaying(dtMicros uint64) {
 
 	// Fixed-step integration: accumulate the frame's delta and run whole
 	// 25ms steps. dtMicros is the per-tick delta, never a running total
-	// (see the cartlib reference, "The Game interface").
+	// (see the cartlib guide, "The Game interface").
 	g.stepAcc += dtMicros
 	for g.stepAcc >= stepMicros {
 		g.stepAcc -= stepMicros
 		res := g.sim.step(dir, cartlib.RandomU64)
 		if res.caught > 0 {
 			playCatch()
-			g.lcdAcc = lcdIntervalMicros // force the readout up now
 		}
 		if res.missed > 0 {
 			playMiss()
-			g.lcdAcc = lcdIntervalMicros
 		}
 		if g.sim.over() {
 			g.enterOver()
 			return
 		}
 	}
-	g.showPlayingLights()
-	g.tickLCD()
+	g.refreshLights()
+	g.refreshReadout()
 }
 
 // topScore reads rank 1 out of the cabinet's shared table for the title

@@ -1,15 +1,15 @@
 // Catcher's authored waves — the opening minute of a run, drawn by hand
 // instead of drawn from the RNG. Edit them here or in levellab at
-// arkade.build/dev/tools (import this file, export it back); `make build`
-// compiles it into the Go the cartridge builds in.
+// arkade.build/dev/tools (connect the cartridge folder and open this
+// file); `make build` compiles it into the Go the cartridge builds in.
 //
 // # How to read a grid
 //
-// A row is a MOMENT, not a place. Time runs down the page: row 0 fires the
-// instant the wave starts, row 1 one `cadence` later, and so on. A column is
-// a drop lane spread evenly across the 64-pixel panel — lane 0 at the left
-// edge, lane 11 at the right — so an `o` says "a fruit falls here, now", and
-// two `o`s on one row fall together.
+// A row is a MOMENT, not a place. Time runs down the page: row 0 fires as
+// the wave's name clears the panel, row 1 one `cadence` later, and so on.
+// A column is a drop lane spread evenly across the 64-pixel panel — lane 0
+// at the left edge, lane 11 at the right — so an `o` says "a fruit falls
+// here, now", and two `o`s on one row fall together.
 //
 // `cadence` is sim steps between rows (one step is 25 ms) and `fall` is the
 // fall speed in sixteenths of a pixel per step, so a wave gets harder by

@@ -102,7 +102,7 @@ Player manuals have their own format contract — a short skeleton
 that fits the shell's manual viewer, and an icon. Preflight's `manifest`
 check enforces the heading, the icon and a footer quoting the manifest
 version, so a version bump forces a manual re-pass
-([Getting started](getting-started.md#8-write-the-manual-and-run-preflight));
+([Quick Start Guide](getting-started.md#8-write-the-manual-and-run-preflight));
 the cartridges repo's `TestManualsCurrent` holds its own fleet to the
 rest.
 

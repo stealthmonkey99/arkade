@@ -6,7 +6,7 @@ wazero) and the browser player (the arkade.build package's `host/` —
 not part of this repo).
 
 **The documentation lives in [`sdk/docs/`](docs/README.md).** Start
-with [Getting started](docs/getting-started.md) (template → build →
+with the [Quick Start Guide](docs/getting-started.md) (template → build →
 play → pack), keep [Gotchas](docs/gotchas.md) open beside it, then read
 the [cartlib](docs/cartlib.md) and [ui](docs/ui.md) references,
 [Manifests & packaging](docs/packaging.md) and the
@@ -73,14 +73,15 @@ versions are in the engine's [Requirements](../README.md#requirements).
 From the engine checkout, with a cartridge library beside it:
 
 ```sh
-brew install tinygo-org/tools/tinygo   # macOS; other platforms: https://tinygo.org/getting-started/install/
+brew install go tinygo-org/tools/tinygo   # macOS; see the Quick Start Guide for other platforms
 mkdir -p ../my-cartridges
 cp -r sdk/template ../my-cartridges/my-game
 rm ../my-cartridges/my-game/template.wasm
 ```
 
-Edit the copy's `go.mod` (see [Module resolution](#module-resolution)),
-`manifest.json` and the Makefile's `ARKADE` line, then:
+Rename the module in the copy's `go.mod`, set your own fields in
+`manifest.json`, and point the Makefile's `ARKADE` line at the engine
+checkout (`../../arkade`), then:
 
 ```sh
 make -C ../my-cartridges/my-game build   # -> my-game.wasm
@@ -89,7 +90,7 @@ make build                               # the engine, once
 ```
 
 Or drag `my-game.wasm` onto the player at [arkade.build](https://arkade.build).
-[Getting started](docs/getting-started.md) walks the same path in full.
+The [Quick Start Guide](docs/getting-started.md) walks the same path in full.
 
 ## Module resolution
 
@@ -100,9 +101,10 @@ its wazero runtime, and so the root `go test ./...` does not descend into
 the guest-side code. The library modules are tagged together
 (`sdk/cartlib/v0.1.0`, `sdk/ui/v0.1.0`, …).
 
-- **A cartridge of your own** requires the tagged modules. Require `ui`
-  even if you import only `cartlib`, which depends on it; add `fsm` and
-  `levels` when the cartridge imports them:
+- **A cartridge of your own** requires the tagged modules, as
+  `sdk/template/go.mod` does, so a copy of the template builds anywhere.
+  Require `ui` even if you import only `cartlib`, which depends on it;
+  add `fsm` and `levels` when the cartridge imports them:
 
   ```go-mod
   require (
@@ -114,12 +116,14 @@ the guest-side code. The library modules are tagged together
   The Makefile still runs four build tools from an engine checkout, the one
   its `ARKADE` line names: `sdk/tools/manifestgen`, `sdk/tools/rcartpack`,
   `tools/genlevelpack` and `tools/wasmfix`.
-- **Inside this checkout**, or to build against unreleased SDK changes,
-  `replace` each SDK module with a path to the checkout's copy:
-  `sdk/template/go.mod` uses `../cartlib` and `../ui`, and a library
-  beside the checkout uses `../../arkade/sdk/cartlib` and so on. Declare
-  a `replace` for every SDK module the build uses, `ui` included:
-  `replace` directives are not transitive.
+- **Inside this checkout**, `sdk/go.work` resolves those same requires to
+  the local SDK and engine, so `sdk/template` and `sdk/tutorial` always
+  build and test against the code beside them. A copy outside `sdk/`
+  leaves the workspace behind.
+- **Against unreleased SDK changes** from a library beside the
+  checkout, `replace` each SDK module the build uses with the checkout's
+  copy (`../../arkade/sdk/cartlib` and so on), `ui` included: `replace`
+  directives are not transitive.
 
 Cartridge tests and tools also import two root-module packages,
 [`carttest`](../carttest/) (the golden-test harness) and

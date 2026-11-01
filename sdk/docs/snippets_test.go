@@ -10,7 +10,8 @@
 // this is the whole of render.go". Those blocks are replayed in step order
 // into an accumulating directory that is built, with its listed tests run, at
 // every step boundary, and the last step must match sdk/tutorial byte for byte.
-// checkpointSeeds supplies the generated files the reader does not type.
+// checkpointSeeds supplies the generated files the reader does not type. The
+// tutorial's non-Go whole-file listings are held to sdk/tutorial too.
 //
 // The test also checks that every relative link names a real file and, with
 // an anchor into markdown, an existing heading; api_test.go holds the SDK's
@@ -18,10 +19,12 @@
 package docs
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"sort"
@@ -438,6 +441,76 @@ func TestTutorialFinalStateMatchesTheReferenceCartridge(t *testing.T) {
 			t.Errorf("%s exists in %s but no tutorial step ever lists it — the reader would never write it",
 				name, referenceCartDir)
 		}
+	}
+}
+
+// TestTutorialFileListingsMatchTheReferenceCartridge holds the tutorial's
+// non-Go whole-file listings (```levels file=..., ```json file=...) to the
+// files in sdk/tutorial: byte for byte, or as equal JSON values for .json,
+// whose listings are allowed a more compact layout than the file.
+// growingFiles are excluded: part 1 shows them as they start, and later
+// parts add to them.
+func TestTutorialFileListingsMatchTheReferenceCartridge(t *testing.T) {
+	growingFiles := map[string]bool{"go.mod": true, "manifest.json": true}
+	docs, err := filepath.Glob("tutorial*.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked := 0
+	for _, doc := range docs {
+		raw, err := os.ReadFile(doc)
+		if err != nil {
+			t.Fatal(err)
+		}
+		lines := strings.Split(string(raw), "\n")
+		for i := 0; i < len(lines); i++ {
+			fields := strings.Fields(strings.TrimPrefix(lines[i], "```"))
+			if !strings.HasPrefix(lines[i], "```") || len(fields) < 2 || fields[0] == "go" {
+				continue
+			}
+			var name string
+			for _, f := range fields[1:] {
+				if v, ok := strings.CutPrefix(f, "file="); ok {
+					name = v
+				}
+			}
+			open := i + 1
+			var body []string
+			for i++; i < len(lines) && !strings.HasPrefix(lines[i], "```"); i++ {
+				body = append(body, lines[i])
+			}
+			if name == "" || growingFiles[name] {
+				continue
+			}
+			want, err := os.ReadFile(filepath.Join(referenceCartDir, name))
+			if err != nil {
+				t.Errorf("%s:%d lists %s, which %s does not have: %v", doc, open, name, referenceCartDir, err)
+				continue
+			}
+			checked++
+			got := strings.Join(body, "\n") + "\n"
+			if strings.HasSuffix(name, ".json") {
+				var a, b any
+				if err := json.Unmarshal([]byte(got), &a); err != nil {
+					t.Errorf("%s:%d: the %s listing is not valid JSON: %v", doc, open, name, err)
+					continue
+				}
+				if err := json.Unmarshal(want, &b); err != nil {
+					t.Fatal(err)
+				}
+				if !reflect.DeepEqual(a, b) {
+					t.Errorf("%s:%d: the %s listing has drifted from %s", doc, open, name, filepath.Join(referenceCartDir, name))
+				}
+				continue
+			}
+			if got != string(want) {
+				t.Errorf("%s:%d: the %s listing has drifted from %s — they are the same file by contract",
+					doc, open, name, filepath.Join(referenceCartDir, name))
+			}
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no non-Go file listings found in the tutorial — extraction is likely broken")
 	}
 }
 
