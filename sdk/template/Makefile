@@ -33,7 +33,7 @@ SLUG := $(shell sed -n 's/.*"slug": *"\([^"]*\)".*/\1/p' manifest.json)
 # here are passed as absolute paths so the change of directory cannot
 # lose them.
 
-.PHONY: build levels manifest test rcart clean
+.PHONY: build levels manifest test rcart devserve clean
 
 build: levels manifest $(SLUG).wasm
 
@@ -57,6 +57,12 @@ test:
 # (sdk/tools/rcartpack's package doc).
 rcart: build manifest.json
 	go -C $(ARKADE) run ./sdk/tools/rcartpack -dir $(CURDIR) -out $(abspath $(SLUG).rcart)
+
+# Play it in the hosted player at arkade.build, rebuilt on every save
+# (tools/devserve; open the link it prints). Add -tls for Safari:
+# make devserve DEVSERVE_FLAGS=-tls
+devserve:
+	go -C $(ARKADE) run ./tools/devserve $(DEVSERVE_FLAGS) $(CURDIR)
 
 clean:
 	rm -f $(SLUG).wasm $(SLUG).rcart

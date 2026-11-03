@@ -161,10 +161,13 @@ generated file has fallen behind.
 
 ## 2. Look around `main.go`
 
-The whole game is one short file — read it top to bottom, it is
-commented as a tour. The skeleton every cartridge shares:
+The template's game is one file, `main.go`: about a hundred lines,
+commented as a tour, that bounce a block, chase the button lights and
+keep a counter across reloads. Read it top to bottom. Underneath the
+demo is the shape every cartridge shares; stripped down to that shape,
+a cartridge looks like this (a sketch, not the template's file):
 
-```go file=main.go
+```go
 package main
 
 import "github.com/stealthmonkey99/arkade/sdk/cartlib"
@@ -257,23 +260,25 @@ page. Keyboard arrows are the joystick, Enter/Space are A, Escape is B.
 Every change is rebuild-and-drag — no engine rebuild, ever, and nothing
 to install.
 
-**In the browser, reloading on save**: from the engine checkout, run
+**In the browser, reloading on save**: still in `my-cartridges/my-game`, run
 
 ```sh
-go run ./tools/devserve ../my-cartridges/my-game
+make devserve   # runs the engine's tools/devserve on this folder
 ```
 
 and open the `https://arkade.build/play?dev=…` link it prints. `devserve`
 rebuilds the cartridge on every save and the player reloads it in place;
 a failed build shows in a banner while the last good build keeps
-running. [Part 4 of the tutorial](tutorial-debug.md#iterate-from-the-browser)
+running. In Safari, run `make devserve DEVSERVE_FLAGS=-tls` instead.
+[Part 4 of the tutorial](tutorial-debug.md#iterate-from-the-browser)
 has the detail.
 
 **In your terminal** (the console renderer — the same engine binary
-the cabinet runs, drawing the LED matrix as colored text). From the
-engine checkout:
+the cabinet runs, drawing the LED matrix as colored text). This one runs
+from the engine checkout:
 
 ```sh
+cd ../../arkade                               # from my-cartridges/my-game
 make build                                    # the engine, once
 ./arkade --cartridges ../my-cartridges/my-game
 ```
@@ -387,6 +392,7 @@ rewrites `manual-icon.png` for every cartridge in the library from its
 Then, from the engine checkout:
 
 ```sh
+cd ../../arkade      # from my-cartridges/my-game
 ARKADE_CARTRIDGE_ROOTS=../my-cartridges go run ./tools/preflight my-game
 ```
 

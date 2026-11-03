@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -102,6 +103,34 @@ func requiresOf(t *testing.T, gomod string) map[string]string {
 		out[m[1]] = m[2]
 	}
 	return out
+}
+
+// A block titled with a filename tells the reader "this is that file", so
+// every such block names a template file and, whole, shows it verbatim.
+// go.mod and manifest.json have their own tests: the reader edits them.
+func TestQuickStartFileBlocksAreTheTemplatesFiles(t *testing.T) {
+	for _, f := range fences(t, quickStart) {
+		var name string
+		for _, field := range strings.Fields(f.info) {
+			if v, ok := strings.CutPrefix(field, "file="); ok {
+				name = v
+			}
+		}
+		if name == "" {
+			continue
+		}
+		path := filepath.Join(templateDir, name)
+		if _, err := os.Stat(path); err != nil {
+			t.Errorf("%s:%d: a block titled %s, but sdk/template has no such file; drop file= for a sketch", quickStart, f.line, name)
+			continue
+		}
+		if name == "go.mod" || name == "manifest.json" || slices.Contains(strings.Fields(f.info), "fragment") {
+			continue
+		}
+		if f.body != readFile(t, path) {
+			t.Errorf("%s:%d: the block titled %s differs from sdk/template/%s; show the real file, or drop file= for a sketch", quickStart, f.line, name, name)
+		}
+	}
 }
 
 func TestQuickStartGoModIsTheTemplates(t *testing.T) {

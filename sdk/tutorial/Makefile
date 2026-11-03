@@ -24,7 +24,7 @@ ARKADE ?= ../..
 # The cartridge's slug names its outputs: <slug>.wasm and <slug>.rcart.
 SLUG := $(shell sed -n 's/.*"slug": *"\([^"]*\)".*/\1/p' manifest.json)
 
-.PHONY: build manifest test rcart assets sheet sfx levels clean
+.PHONY: build manifest test rcart assets sheet sfx levels devserve clean
 
 build: levels manifest $(SLUG).wasm
 
@@ -67,6 +67,12 @@ sfx:
 # mount time — so a bad bundle is rejected here, not days later.
 rcart: build manifest.json
 	go -C $(ARKADE) run ./sdk/tools/rcartpack -dir $(CURDIR) -out $(abspath $(SLUG).rcart)
+
+# Play it in the hosted player at arkade.build, rebuilt on every save
+# (tools/devserve; open the link it prints). Add -tls for Safari:
+# make devserve DEVSERVE_FLAGS=-tls
+devserve:
+	go -C $(ARKADE) run ./tools/devserve $(DEVSERVE_FLAGS) $(CURDIR)
 
 clean:
 	rm -f $(SLUG).wasm $(SLUG).rcart

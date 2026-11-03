@@ -33,11 +33,11 @@ and drop.
 ## Iterate from the browser
 
 To skip the rebuild-and-drag step, let the hosted player watch the
-cartridge. From the engine checkout (it needs TinyGo on your `PATH`, as
-`make rcart` does):
+cartridge. From `my-cartridges/catcher` (it needs TinyGo on your `PATH`,
+as `make rcart` does):
 
 ```sh
-go run ./tools/devserve ../my-cartridges/catcher
+make devserve   # runs the engine's tools/devserve on this folder
 ```
 
 `devserve` builds the cartridge with its own Makefile, serves the result
@@ -53,8 +53,9 @@ place. If the build fails, a banner over the player says so and the last
 good build keeps running; the compiler's output is in the terminal where
 `devserve` runs. Fix the error, save again, and the banner clears.
 Ctrl-C stops it. The cartridge directory needs the `manifest.json`,
-`go.mod` and `Makefile` that `sdk/template` gives you. In Safari, add
-`-tls`, as for `assetbridge` in [the assets tutorial](tutorial-assets.md#open-the-lab).
+`go.mod` and `Makefile` that `sdk/template` gives you. In Safari, run
+`make devserve DEVSERVE_FLAGS=-tls`, as for `assetbridge` in
+[the assets tutorial](tutorial-assets.md#open-the-lab).
 
 This is where you actually play it. Catch things. Miss deliberately.
 Mash the dash while it is dark and check the light matches. Let the
