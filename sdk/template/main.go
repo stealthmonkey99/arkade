@@ -18,6 +18,7 @@ const storageKey = "counter"
 // counter through host storage.
 type demoGame struct {
 	x, y, dx, dy int    // the bouncing block's position/velocity
+	steps        int    // block steps taken; the lights move every 4th
 	lightIdx     int    // which of the 6 button lights is lit
 	stepAcc      uint64 // dtMicros accumulator, see Update
 	counter      uint32 // persisted across cartridge (re)loads
@@ -28,7 +29,9 @@ func (g *demoGame) Manifest() []byte { return manifestBytes }
 // Init receives the Setup every asset load and channel bind goes through;
 // this demo has none to make.
 func (g *demoGame) Init(s *cartlib.Setup) {
-	g.x, g.y, g.dx, g.dy = cartlib.FBWidth/2, cartlib.FBHeight/2, 1, 1
+	// Off the diagonal, so the block circles the screen instead of
+	// shuttling between two corners.
+	g.x, g.y, g.dx, g.dy = cartlib.FBWidth/4, cartlib.FBHeight/2, 1, 1
 	var buf [4]byte
 	if cartlib.StorageRead(storageKey, buf[:]) == 4 {
 		g.counter = leUint32(buf[:])
@@ -53,8 +56,8 @@ func (g *demoGame) HandleInput(records []cartlib.InputRecord) {
 	}
 }
 
-// Update steps the block and lights once per 100ms of accumulated dtMicros,
-// the only time source a cartridge may use.
+// Update steps the block once per 100ms of accumulated dtMicros, the only
+// time source a cartridge may use, and the lights once per 400ms.
 func (g *demoGame) Update(dtMicros uint64) {
 	const stepMicros = 100_000
 	g.stepAcc += dtMicros
@@ -66,6 +69,10 @@ func (g *demoGame) Update(dtMicros uint64) {
 		}
 		if g.y <= 0 || g.y >= cartlib.FBHeight-8 {
 			g.dy = -g.dy
+		}
+		g.steps++
+		if g.steps%4 != 0 {
+			continue
 		}
 		g.lightIdx = (g.lightIdx + 1) % 6
 		cartlib.SetButtonLights(cartlib.SeatBoth, cartlib.MaskJoyA<<uint(g.lightIdx), true)

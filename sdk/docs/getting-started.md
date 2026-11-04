@@ -304,75 +304,33 @@ palette.
 
 `cartlib` compiles under the ordinary host Go toolchain too (see
 `sdk/cartlib`'s package doc, "Build tags"), so your game is testable
-with plain `go test`, no TinyGo, no wasm:
+with plain `go test`, no TinyGo, no wasm. The template ships two tests
+in `main_test.go` to start from:
 
 ```sh
-go test ./...        # from my-cartridges/my-game
+cd ../my-cartridges/my-game   # back from the engine checkout
+go test ./...
 ```
 
 Rules, physics and board math that never call a `cartlib.*` host
-wrapper test as they are — `sdk/tutorial/catcher_test.go` in the engine
-checkout is the pattern. Code that does reach the host runs against the
-in-process fake in `sdk/cartlib/hosttest`: `h := hosttest.New(t)`
-installs it for the test, `h.Init(game)` runs your `Init` with a live
-`*cartlib.Setup`, `h.AdvancePastSplash()`, `h.Input(...)` and
-`h.Tick(dt)` drive the frame loop the way the cabinet does, and the
-Host's fields hold the frame, LCD text, lamps, sounds, storage and scores
-your game wrote. A host call with no fake installed panics, so a test
-that reaches one by accident says so.
+wrapper test as plain functions. Code that does reach the host runs
+against the in-process fake in `sdk/cartlib/hosttest`, which is what
+`main_test.go` uses: `h := hosttest.New(t)` installs it for the test,
+`h.Init(game)` runs your `Init` with a live `*cartlib.Setup`,
+`h.AdvancePastSplash()`, `h.Input(...)` and `h.Tick(dt)` drive the
+frame loop the way the cabinet does, and the Host's fields hold the
+frame, LCD text, lamps, sounds, storage and scores your game wrote. A
+host call with no fake installed panics, so a test that reaches one by
+accident says so.
 
-Once the game is worth protecting, add a **golden test** beside the
-game as `my-game_golden_test.go`, in the cartridge's own module (copy
-`sdk/tutorial/catcher_golden_test.go`): it drives your compiled `.wasm`
-through the engine's `carttest` harness with a fixed RNG script and
-fixed timing, asserts ASCII snapshots of the frames, and checks that two
-runs are byte-identical. The harness lives in the engine module, so the
-test needs the engine in `go.mod`: with the file in place, `go mod tidy`
-adds `require github.com/stealthmonkey99/arkade v0.1.0` and its
-dependencies. Only host-side test code imports
-it; nothing in the TinyGo build sees it. That determinism check is the ABI's core promise — see [ABI
-reference](abi.md#determinism) for what your game must (and must not)
-do to keep it. Regenerate snapshots after intentional visual changes
-with `UPDATE_GOLDENS=1 go test ...`.
+Once the game is worth protecting, add **golden tests**: they drive your
+compiled `.wasm` through the engine's `carttest` harness with fixed
+randomness and timing, compare the frames against saved ASCII
+snapshots, and check that two runs are byte-identical, the ABI's
+[determinism](abi.md#determinism) promise. The tutorial adds them in
+[Part 4](tutorial-debug.md#golden-tests).
 
-## 6. Pack a `.rcart`
-
-A bare `.wasm` is a valid cartridge with no assets. To make some, open
-the **asset lab** — seven browser tools: **spritelab** for pixel art
-and animation, **soundlab** for synthesized effects and music loops,
-plus glyphlab, hidlab, periphlab, levellab and fsmlab. It runs hosted
-at `arkade.build/dev/tools`. Connect your cartridge folder from a
-tool's toolbar and it reads and saves the cartridge's `assets/` files
-directly. A small
-generator you run from the cartridge (`tools/gen-sfx` for the audio, for
-instance) turns the rest into what the build consumes. The
-[tutorial](tutorial-assets.md) walks the whole path.
-
-Once you have assets under `assets/`, pack the distributable bundle —
-manifest, wasm, and assets in one file:
-
-```sh
-make rcart      # from my-cartridges/my-game
-```
-
-This runs `sdk/tools/rcartpack`, which applies the **exact same
-validation the cabinet's loader applies at mount time** — a bundle
-that's too big or has a bad manifest is rejected at pack time with the
-identical error, instead of failing days later on a cabinet. Format
-details and caps: [Manifests & packaging](packaging.md).
-
-The web player accepts the `.rcart` by drag-and-drop exactly like the
-bare `.wasm`, now with working sound and sprite assets; `devserve` packs
-and serves the `.rcart` for you.
-
-## 7. Put it on a cabinet
-
-If you have one, a USB stick with the `.rcart` at its root is the
-simplest route: the game appears in the shell menu, no engine rebuild.
-Copying it over the network is in
-[Running on a cabinet](../../docs/CABINET.md#deploying-a-cartridge).
-
-## 8. Write the manual and run preflight
+## 6. Write the manual and run preflight
 
 Every cartridge ships a player manual, `MANUAL.md`, beside
 `manifest.json`. Preflight checks three things about it: a `# My Game`
@@ -400,8 +358,46 @@ Preflight runs the checks the published cartridges pass: the TinyGo
 golden rules, WAV audibility, sprite alpha, the manifest and manual, the
 packed bundle, the LCD text, and your own `go test ./...` (`-fast`
 skips that last one). It wants a built `my-game.wasm`, so run
-`make build` first. [Part 4 of the tutorial](tutorial-debug.md) reads a
-report line by line.
+`make build` first. [Part 4 of the tutorial](tutorial-debug.md#preflight)
+reads a report line by line.
+
+## 7. Pack a `.rcart`
+
+A bare `.wasm` is a valid cartridge with no assets. To make some, open
+the **asset lab** — seven browser tools: **spritelab** for pixel art
+and animation, **soundlab** for synthesized effects and music loops,
+plus glyphlab, hidlab, periphlab, levellab and fsmlab. It runs hosted
+at `arkade.build/dev/tools`. Connect your cartridge folder from a
+tool's toolbar and it reads and saves the cartridge's `assets/` files
+directly. A small
+generator you run from the cartridge (`tools/gen-sfx` for the audio, for
+instance) turns the rest into what the build consumes. The
+[tutorial](tutorial-assets.md) walks the whole path.
+
+Once you have assets under `assets/`, pack the distributable bundle —
+manifest, wasm, and assets in one file:
+
+```sh
+cd ../my-cartridges/my-game   # back from the engine checkout
+make rcart
+```
+
+This runs `sdk/tools/rcartpack`, which applies the **exact same
+validation the cabinet's loader applies at mount time** — a bundle
+that's too big or has a bad manifest is rejected at pack time with the
+identical error, instead of failing days later on a cabinet. Format
+details and caps: [Manifests & packaging](packaging.md).
+
+The web player accepts the `.rcart` by drag-and-drop exactly like the
+bare `.wasm`, now with working sound and sprite assets; `devserve` packs
+and serves the `.rcart` for you.
+
+## 8. Put it on a cabinet
+
+If you have one, a USB stick with the `.rcart` at its root is the
+simplest route: the game appears in the shell menu, no engine rebuild.
+Copying it over the network is in
+[Running on a cabinet](../../docs/CABINET.md#deploying-a-cartridge).
 
 ## Where next
 

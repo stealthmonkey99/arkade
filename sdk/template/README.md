@@ -46,6 +46,8 @@ Then edit, in order:
    `manifest.json`, so never edit it (see `cartlib`'s package doc,
    "Manifest and wasmfix") — and keep the `var _ = cartlib.Run(...)`
    registration at the package level, never inside `func main`.
+5. `main_test.go` — tests of the demo through `sdk/cartlib/hosttest`;
+   rewrite them for your game, keeping the pattern.
 
 ## Build / test / package
 
