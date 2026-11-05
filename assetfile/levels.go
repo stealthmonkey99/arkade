@@ -58,10 +58,7 @@ func writeLevelsEnvelope(env *Envelope) ([]byte, error) {
 		return nil, err
 	}
 	block := formatLevelsEnvelope(buf.Bytes())
-	out := make([]byte, 0, len(block)+len(env.Body))
-	out = append(out, block...)
-	out = append(out, env.Body...)
-	return out, nil
+	return append([]byte(block), env.Body...), nil
 }
 
 // stemName strips every extension: "walls.arkadelevels" becomes "walls".

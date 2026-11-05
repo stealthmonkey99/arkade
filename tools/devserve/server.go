@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"mime"
 	"net/http"
 	"os"
@@ -256,13 +257,14 @@ func (s *devServer) handleDistFile(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	dist := os.DirFS(filepath.Join(s.playerDir, "dist"))
 	path := filepath.Join(s.playerDir, "dist", name)
-	fi, err := os.Stat(path)
+	fi, err := fs.Stat(dist, name)
 	if err != nil || !fi.Mode().IsRegular() {
 		httpErr(w, http.StatusNotFound, fmt.Sprintf("devserve: %s not found; build the player first (npm ci && npm run build)", path))
 		return
 	}
-	data, err := os.ReadFile(path)
+	data, err := fs.ReadFile(dist, name)
 	if err != nil {
 		httpErr(w, http.StatusInternalServerError, fmt.Sprintf("devserve: couldn't read %s: %v", path, err))
 		return

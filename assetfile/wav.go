@@ -55,8 +55,7 @@ func joinRIFF(form [4]byte, chunks []riffChunk) []byte {
 			body = append(body, 0)
 		}
 	}
-	out := make([]byte, 0, 8+len(body))
-	out = append(out, []byte("RIFF")...)
+	out := []byte("RIFF")
 	var size [4]byte
 	binary.LittleEndian.PutUint32(size[:], uint32(len(body)))
 	out = append(out, size[:]...)

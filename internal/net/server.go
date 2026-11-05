@@ -175,7 +175,10 @@ func (s *Server) handleLogs(w http.ResponseWriter, r *http.Request) *rejection {
 	n := 200
 	if v := r.URL.Query().Get("n"); v != "" {
 		if parsed, err := strconv.Atoi(v); err == nil && parsed > 0 {
-			n = min(parsed, maxLogEntries)
+			if parsed > maxLogEntries {
+				parsed = maxLogEntries
+			}
+			n = parsed
 		}
 	}
 	writeJSON(w, http.StatusOK, s.ring.Tail(n))
